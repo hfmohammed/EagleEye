@@ -9,7 +9,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize YOLO model
 MODEL = YOLO("yolov8n")
-DATA = []
+DATA = {"data": []}
 
 def yolo_annotate(frame):
     results = MODEL(frame)
@@ -27,6 +27,7 @@ def capture_camera(source):
     
     print("_____DEBUG 4: Cap is opened!_____")
 
+    frameCount = 0
     while cap.isOpened():
         current_data = {}
         ret, frame = cap.read()
@@ -34,7 +35,7 @@ def capture_camera(source):
             print("_____DEBUG 5: Failed to grab frame or end of video reached._____")
             break
 
-        results = yolo_annotate(frame)
+        results = MODEL(frame)
 
         for result in results[0].boxes:
             classId = int(result.cls)
@@ -50,18 +51,20 @@ def capture_camera(source):
             cv.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv.putText(frame, f'{className} {conf:.2f}', (x1, y1 - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
 
-
-        _, buffer = cv.imencode('.png', frame)
+        print("_____DEBUG 6: for loop ended____")
+        _, buffer = cv.imencode('.jpg', frame)
         frame_data = base64.b64encode(buffer).decode('utf-8')
+        print("_____DEBUG 7: frame is converted to binary_____")
         
-        DATA.append(current_data)
+        DATA["data"].append([frameCount, current_data])
 
         # Emit the frame data and annotated results to the frontend
         socketio.emit('video_frame', 
-                      {'frame': frame_data, 'current_data': current_data, 'DATA': DATA})
+                      {'frame': frame_data, 'current_data': {"frame": current_data}, 'DATA': DATA})
 
         # Sleep to reduce the frame rate (optional)
         # socketio.sleep(0.1)
+        frame += 1
 
     cap.release()
 
