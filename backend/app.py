@@ -1,5 +1,5 @@
-from flask import Flask
-from flask_socketio import SocketIO, emit
+from flask import Flask # type: ignore
+from flask_socketio import SocketIO, emit # type: ignore
 from ultralytics import YOLO
 import cv2 as cv
 import base64
@@ -9,7 +9,17 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize YOLO model
 MODEL = YOLO("yolov8n")
-DATA = {"data": []}
+DATA = {}
+
+
+def processData(x: dict):
+    uqCategories = set()
+    for i in x.values():
+        ik = i.keys()
+        for j in ik:
+            uqCategories.add(j)
+    
+    return list(uqCategories)
 
 def yolo_annotate(frame):
     results = MODEL(frame)
@@ -29,11 +39,12 @@ def capture_camera(source):
 
     frameCount = 0
     while cap.isOpened():
-        current_data = {}
+        DATA[frameCount] = {}
         ret, frame = cap.read()
         if not ret:
             print("_____DEBUG 5: Failed to grab frame or end of video reached._____")
-            break
+            socketio.start_background_task(capture_camera, source)
+
 
         results = MODEL(frame)
 
@@ -41,9 +52,9 @@ def capture_camera(source):
             classId = int(result.cls)
             className = MODEL.names[classId]
 
-            if className not in current_data:
-                current_data[className] = 0
-            current_data[className] += 1
+            if className not in DATA[frameCount]:
+                DATA[frameCount][className] = 0
+            DATA[frameCount][className] += 1
 
             x1, y1, x2, y2 = map(int, result.xyxy[0])
             conf = result.conf[0]
@@ -56,15 +67,22 @@ def capture_camera(source):
         frame_data = base64.b64encode(buffer).decode('utf-8')
         print("_____DEBUG 7: frame is converted to binary_____")
         
-        DATA["data"].append([frameCount, current_data])
 
         # Emit the frame data and annotated results to the frontend
-        socketio.emit('video_frame', 
-                      {'frame': frame_data, 'current_data': {"frame": current_data}, 'DATA': DATA})
+        uqCategories = processData(DATA)
+        print(uqCategories)
+
+        socketio.emit('video_frame', {
+            'frame': frame_data,
+            'current_data': DATA[frameCount],
+            'data': DATA,
+            'uqCategories': uqCategories,
+
+        })
 
         # Sleep to reduce the frame rate (optional)
         # socketio.sleep(0.1)
-        frame += 1
+        frameCount += 1
 
     cap.release()
 
@@ -74,7 +92,7 @@ def index():
 
 if __name__ == '__main__':
     source = "../resources/cars.mp4"
-    source = "0"
+    # source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
     socketio.run(app, host='0.0.0.0', port=5001)
