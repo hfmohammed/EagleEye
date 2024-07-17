@@ -43,7 +43,7 @@ def capture_camera(source):
         ret, frame = cap.read()
         if not ret:
             print("_____DEBUG 5: Failed to grab frame or end of video reached._____")
-            socketio.start_background_task(capture_camera, source)
+            break
 
 
         results = MODEL(frame)
@@ -91,8 +91,8 @@ def index():
     return "Server is running"
 
 if __name__ == '__main__':
-    source = "../resources/cars.mp4"
-    # source = "0"
+    # source = "../resources/cars.mp4"
+    source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
     socketio.run(app, host='0.0.0.0', port=5001)
