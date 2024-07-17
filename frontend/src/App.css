@@ -16,12 +16,10 @@ main {
 
 .video-section {
   display: flex;
-  flex: 1;
+  width: 50%;
   height: 100%;
-
   padding: 5px;
   box-sizing: border-box;
-
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -29,7 +27,7 @@ main {
 
 .video-grid-col {
   display: flex;
-  flex: 1;
+  width: 100%;
   height: 100%;
 
   flex-direction: column;
@@ -46,16 +44,16 @@ main {
 
 .data-section {
   display: flex;
-  flex: 1;
+  width: 50%;
   flex-direction: column;
 }
 
 .data-subsection {
   flex: 1;
   display: flex;
-
   padding: 5px 10px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .plots-grid {
@@ -81,7 +79,6 @@ main {
   overflow: hidden;
 }
 
-
 .plot.single-chart {
   height: 100%;
   width: 100%;
@@ -103,4 +100,51 @@ footer {
 
 .tab-section {
   overflow-y: auto;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.tab-panel {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 0.9em;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+  font-weight: bold;
+}
+
+table th,
+table td {
+  padding: 12px 15px;
+  min-width: 120px; /* Ensuring each cell has a minimum width */
+}
+
+table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+table tbody tr.active-row {
+  font-weight: bold;
+  color: #009879;
 }
