@@ -39,6 +39,9 @@ def capture_camera(source):
 
     frameCount = 0
     while cap.isOpened():
+        if frameCount >= 500:
+            del DATA[frameCount - 500]
+
         DATA[frameCount] = {}
         ret, frame = cap.read()
         if not ret:
@@ -70,7 +73,6 @@ def capture_camera(source):
 
         # Emit the frame data and annotated results to the frontend
         uqCategories = processData(DATA)
-        print(uqCategories)
 
         socketio.emit('video_frame', {
             'frame': frame_data,
@@ -91,7 +93,7 @@ def index():
     return "Server is running"
 
 if __name__ == '__main__':
-    # source = "../resources/cars.mp4"
+    source = "../resources/cars.mp4"
     source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
