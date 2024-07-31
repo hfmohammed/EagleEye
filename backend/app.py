@@ -97,6 +97,7 @@ def capture_camera(source):
         ret, frame = cap.read()
         if not ret:
             print("_____DEBUG 5: Failed to grab frame or end of video reached._____")
+            sys.exit()
             break
 
 
