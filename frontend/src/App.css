@@ -1,11 +1,17 @@
+/* App.css */
 .App {
   text-align: center;
 }
 
 header {
-  background-color: #282c34;
+  background-color: #1f2937; /* Darker background color */
   padding: 10px 20px;
   color: white;
+}
+
+header h3 {
+  margin: 0;
+  font-size: 1.5rem;
 }
 
 main {
@@ -23,35 +29,39 @@ main {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background-color: #f9fafb; /* Light background color */
 }
 
 .video-grid-col {
   display: flex;
   width: 100%;
   height: 100%;
-
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
 .video {
-  padding: 2px 5px;
-  width: 100%;
-  height: fit-content;
+  margin: 5px;
+  width: calc(100% - 5px);
+  height: auto;
   box-sizing: border-box;
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  border: 2px solid #1f2937;
 }
 
 .data-section {
   display: flex;
   width: 50%;
   flex-direction: column;
+  background-color: #f3f4f6; /* Slightly darker background for contrast */
 }
 
 .data-subsection {
   flex: 1;
   display: flex;
-  padding: 5px 10px;
+  padding: 10px;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -120,7 +130,7 @@ table {
 }
 
 table thead tr {
-  background-color: #009879;
+  background-color: #4a5568; /* Darker header background */
   color: #ffffff;
   text-align: left;
   font-weight: bold;
@@ -129,7 +139,7 @@ table thead tr {
 table th,
 table td {
   padding: 12px 15px;
-  min-width: 120px; /* Ensuring each cell has a minimum width */
+  min-width: 120px;
 }
 
 table tbody tr {
@@ -137,14 +147,14 @@ table tbody tr {
 }
 
 table tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
+  background-color: #edf2f7; /* Light alternate row color */
 }
 
 table tbody tr:last-of-type {
-  border-bottom: 2px solid #009879;
+  border-bottom: 2px solid #4a5568;
 }
 
 table tbody tr.active-row {
   font-weight: bold;
-  color: #009879;
+  color: #4a5568; /* Darker active row color */
 }
