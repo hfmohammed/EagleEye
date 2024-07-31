@@ -3,6 +3,10 @@ from flask_socketio import SocketIO, emit # type: ignore
 from ultralytics import YOLO
 import cv2 as cv
 import base64
+import sqlite3
+from datetime import datetime
+
+DB_PATH = "video_data.db"
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -11,21 +15,59 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 MODEL = YOLO("yolov8n")
 DATA = {}
 
+def connect_db():
+    return sqlite3.connect(DB_PATH, check_same_thread=False)
+
+CONN = connect_db()
+CURSOR = CONN.cursor()
+
+def create_table():
+    CURSOR.execute("""
+        DROP TABLE IF EXISTS videoData;
+    """)
+    
+    CURSOR.execute("""
+        CREATE TABLE IF NOT EXISTS videoData (
+            frame_number INTEGER PRIMARY KEY NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            current_data TEXT NOT NULL,
+            uqCategories TEXT NOT NULL
+        );
+    """)
+
+    CONN.commit()
+
+
+def insert_data(frame_number, current_data, uqCategories):
+    print('inserting...', frame_number, current_data, uqCategories)
+
+    CURSOR.execute(
+        """
+        INSERT INTO videoData (frame_number, current_data, uqCategories)
+        VALUES (?, ?, ?)
+        """,
+        (frame_number, str(current_data), str(uqCategories))
+    )
+    CONN.commit()
+
 
 def processData(x: dict):
     uqCategories = set()
     for i in x.values():
         ik = i.keys()
         for j in ik:
-            uqCategories.add(j)
-    
-    return list(uqCategories)
+            if j != 'time':
+                uqCategories.add(j)
+
+    return ['time'] + list(uqCategories)
 
 def yolo_annotate(frame):
     results = MODEL(frame)
     return results
 
 def capture_camera(source):
+    create_table()
+
     print("_____DEBUG 2: called capture_camera_____")
     if source == "0":
         source = 0
@@ -36,13 +78,22 @@ def capture_camera(source):
         return
     
     print("_____DEBUG 4: Cap is opened!_____")
-
-    frameCount = 0
+    stime = datetime.now()
+    frameCount = 1
     while cap.isOpened():
         if frameCount >= 500:
             del DATA[frameCount - 500]
 
-        DATA[frameCount] = {}
+        if source == 0:
+            DATA[frameCount] = {
+                'time': str(datetime.now().strftime("%H:%M:%S")),
+            }
+        else:
+            DATA[frameCount] = {
+                'time': str(datetime.now() - stime).split('.')[0],
+            }
+
+
         ret, frame = cap.read()
         if not ret:
             print("_____DEBUG 5: Failed to grab frame or end of video reached._____")
@@ -82,10 +133,14 @@ def capture_camera(source):
 
         })
 
+        insert_data(frameCount, DATA[frameCount], uqCategories)
+
         # Sleep to reduce the frame rate (optional)
         # socketio.sleep(0.1)
         frameCount += 1
 
+    CURSOR.close()
+    CONN.close()
     cap.release()
 
 @app.route('/')
@@ -94,7 +149,7 @@ def index():
 
 if __name__ == '__main__':
     source = "../resources/cars.mp4"
-    source = "0"
+    # source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
     socketio.run(app, host='0.0.0.0', port=5001)
