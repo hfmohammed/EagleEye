@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import "react-tabs/style/react-tabs.css";
 import "./App.css";
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +14,7 @@ import {
   Tooltip,
   Legend,
   PointElement,
-} from 'chart.js';
+} from "chart.js";
 import { Bar, Pie, Line } from "react-chartjs-2";
 
 // Register Chart.js components
@@ -42,10 +41,6 @@ const App = () => {
 
   useEffect(() => {
     socket.on("video_frame", ({ frame, current_data, data, uqCategories }) => {
-      console.log("_____DEBUG 102: Received current_data:", current_data);
-      console.log("_____DEBUG 103: Received data:", data);
-      console.log("_____DEBUG 104: Received uqCategories:", uqCategories);
-
       setImageSrc(`data:image/jpeg;base64,${frame}`);
       setCurrentData(current_data);
       setDATA(data);
@@ -60,8 +55,8 @@ const App = () => {
   useEffect(() => {
     // Adjust canvas size to fit their containers
     const adjustCanvasSize = () => {
-      const canvases = document.querySelectorAll('.plot canvas');
-      canvases.forEach(canvas => {
+      const canvases = document.querySelectorAll(".plot canvas");
+      canvases.forEach((canvas) => {
         const parent = canvas.parentElement;
         if (parent) {
           canvas.style.width = `${parent.clientWidth}px`;
@@ -72,12 +67,12 @@ const App = () => {
 
     adjustCanvasSize();
 
-    window.addEventListener('resize', adjustCanvasSize);
-    return () => window.removeEventListener('resize', adjustCanvasSize);
+    window.addEventListener("resize", adjustCanvasSize);
+    return () => window.removeEventListener("resize", adjustCanvasSize);
   }, []);
 
   // Prepare data for bar and pie charts
-  const labels = Object.keys(currentData);
+  const labels = Object.keys(currentData).filter((key) => key !== "time");
   const data = Object.values(currentData);
 
   const chartData = {
@@ -114,18 +109,17 @@ const App = () => {
 
   const lineChartData = {
     labels: frameNumbers,
-    datasets: uqCategories.map((category, index) => ({
+    datasets: uqCategories
+    .filter((category) => category !== "time")
+    .map((category, index) => ({
       label: category,
-      data: frameNumbers.map(frameNumber => DATA[frameNumber][category] || 0),
+      data: frameNumbers
+        .map((frameNumber) => DATA[frameNumber][category] || 0),
       borderColor: `hsl(${(index * 360) / uqCategories.length}, 70%, 50%)`,
       backgroundColor: `hsla(${(index * 360) / uqCategories.length}, 70%, 80%, 0.2)`,
       fill: false,
     })),
   };
-
-  console.log("_____DEBUG 200: chartData:", chartData);
-  console.log("_____DEBUG 201: pieChartData:", pieChartData);
-  console.log("_____DEBUG 202: lineChartData:", lineChartData);
 
   return (
     <>
@@ -175,7 +169,7 @@ const App = () => {
                 <table>
                   <thead>
                     <tr>
-                      {Object.keys(currentData).map(key => (
+                      {Object.keys(currentData).map((key) => (
                         <th key={key}>{key}</th>
                       ))}
                     </tr>
@@ -194,16 +188,16 @@ const App = () => {
                   <thead>
                     <tr>
                       <th>Frame</th>
-                      {uqCategories.map(category => (
+                      {uqCategories.map((category) => (
                         <th key={category}>{category}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.keys(DATA).map(frameNumber => (
+                    {Object.keys(DATA).map((frameNumber) => (
                       <tr key={frameNumber}>
                         <td>{frameNumber}</td>
-                        {uqCategories.map(category => (
+                        {uqCategories.map((category) => (
                           <td key={category}>{DATA[frameNumber][category] || 0}</td>
                         ))}
                       </tr>
@@ -220,4 +214,3 @@ const App = () => {
 };
 
 export default App;
-
