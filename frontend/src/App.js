@@ -72,7 +72,7 @@ const App = () => {
   }, []);
 
   // Prepare data for bar and pie charts
-  const labels = Object.keys(currentData);
+  const labels = Object.keys(currentData).filter((key) => key !== "time");
   const data = Object.values(currentData);
 
   const chartData = {
@@ -109,9 +109,12 @@ const App = () => {
 
   const lineChartData = {
     labels: frameNumbers,
-    datasets: uqCategories.map((category, index) => ({
+    datasets: uqCategories
+    .filter((category) => category !== "time")
+    .map((category, index) => ({
       label: category,
-      data: frameNumbers.map((frameNumber) => DATA[frameNumber][category] || 0),
+      data: frameNumbers
+        .map((frameNumber) => DATA[frameNumber][category] || 0),
       borderColor: `hsl(${(index * 360) / uqCategories.length}, 70%, 50%)`,
       backgroundColor: `hsla(${(index * 360) / uqCategories.length}, 70%, 80%, 0.2)`,
       fill: false,
