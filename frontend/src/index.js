@@ -6,10 +6,10 @@ import LoginPage from './Login';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+const loggedIn = 1;
 root.render(
   <React.StrictMode>
-    <App />
-    {/* <LoginPage /> */}
+    {loggedIn ?  <App /> : <LoginPage />}
   </React.StrictMode>
 );
 
