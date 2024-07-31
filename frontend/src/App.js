@@ -108,7 +108,8 @@ const App = () => {
   const frameNumbers = Object.keys(DATA);
 
   const lineChartData = {
-    labels: frameNumbers,
+    // labels: frameNumbers,
+    labels: frameNumbers.map((frameNumber) => DATA[frameNumber]['time']),
     datasets: uqCategories
     .filter((category) => category !== "time")
     .map((category, index) => ({
