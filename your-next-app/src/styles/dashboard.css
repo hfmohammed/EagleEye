@@ -1,0 +1,164 @@
+/* App.css */
+.App {
+  text-align: center;
+}
+
+.dashboard-header {
+  background-color: #1f2937; /* Darker background color */
+  padding: 10px 20px;
+  color: white;
+}
+
+.dashboard-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.dashboard-main {
+  height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: row;
+}
+
+.video-section {
+  display: flex;
+  width: 50%;
+  height: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f9fafb; /* Light background color */
+}
+
+.video-grid-col {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.video {
+  margin: 5px;
+  width: calc(100% - 5px);
+  height: auto;
+  box-sizing: border-box;
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  border: 2px solid #1f2937;
+}
+
+.data-section {
+  display: flex;
+  width: 50%;
+  flex-direction: column;
+  background-color: #f3f4f6; /* Slightly darker background for contrast */
+}
+
+.data-subsection {
+  flex: 1;
+  display: flex;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.plots-grid {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.plots-grid-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50%;
+  width: 100%;
+}
+
+.plot {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.plot.single-chart {
+  height: 100%;
+  width: 100%;
+}
+
+.plot.double-chart {
+  height: 100%;
+  width: 100%;
+}
+
+footer {
+  height: 50px;
+  background-color: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-section {
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.tab-panel {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+}
+
+/* Table Styling */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 0.9em;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.data-table thead tr {
+  background-color: #4a5568; /* Darker header background */
+  color: #ffffff;
+  text-align: left;
+  font-weight: bold;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px 15px;
+  min-width: 120px;
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.data-table tbody tr:nth-of-type(even) {
+  background-color: #edf2f7; /* Light alternate row color */
+}
+
+.data-table tbody tr:last-of-type {
+  border-bottom: 2px solid #4a5568;
+}
+
+.data-table tbody tr.active-row {
+  font-weight: bold;
+  color: #4a5568; /* Darker active row color */
+}
+
+.react-tabs__tab--selected {
+  background-color: transparent;
+}
