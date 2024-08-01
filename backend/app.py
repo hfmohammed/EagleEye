@@ -56,10 +56,10 @@ def processData(x: dict):
     for i in x.values():
         ik = i.keys()
         for j in ik:
-            if j != 'time':
+            if j != 'Time':
                 uqCategories.add(j)
 
-    return ['time'] + list(uqCategories)
+    return ['Frame', 'Time'] + list(uqCategories)
 
 def yolo_annotate(frame):
     results = MODEL(frame)
@@ -86,11 +86,11 @@ def capture_camera(source):
 
         if source == 0:
             DATA[frameCount] = {
-                'time': str(datetime.now().strftime("%H:%M:%S")),
+                'Time': str(datetime.now().strftime("%H:%M:%S")),
             }
         else:
             DATA[frameCount] = {
-                'time': str(datetime.now() - stime).split('.')[0],
+                'Time': str(datetime.now() - stime).split('.')[0],
             }
 
 
@@ -147,9 +147,14 @@ def capture_camera(source):
 def index():
     return "Server is running"
 
-if __name__ == '__main__':
+
+@app.route('/start-server', methods=['POST'])
+def start_server():
     source = "../resources/cars.mp4"
     # source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
+    return "Server started", 200
+
+if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5001)
