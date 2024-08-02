@@ -159,6 +159,17 @@ footer {
   color: #4a5568; /* Darker active row color */
 }
 
-.react-tabs__tab--selected {
-  background-color: transparent;
+/* Ensuring pseudo-elements do not interfere */
+.react-tabs__tab--selected::before,
+.react-tabs__tab--selected::after {
+  content: none !important;
+}
+
+/* Ensuring pseudo-elements do not interfere */
+.react-tabs__tab:hover {
+  background-color: rgb(196, 196, 196);
+}
+
+.react-tabs__tab {
+  border-radius: 5px 5px 0 0;
 }

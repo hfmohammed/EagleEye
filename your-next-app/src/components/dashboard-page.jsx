@@ -3,7 +3,6 @@ import io from "socket.io-client";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import "../styles/dashboard.css";
-import { Header } from '@/components/header'
 
 import {
   Chart as ChartJS,
@@ -127,8 +126,6 @@ const DashboardPage = () => {
 
   return (
     <>
-      <Header />
-
       <main className="dashboard-main">
         <section className="video-section">
           <div className="video-grid-col">
