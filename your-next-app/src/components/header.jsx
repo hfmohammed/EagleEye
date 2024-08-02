@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FaCamera, FaVideo, FaCog, FaBars, FaUserCircle, FaSignOutAlt, FaTimes } from 'react-icons/fa';
+import { FaCamera, FaVideo, FaCog, FaBars, FaUserCircle, FaSignOutAlt, FaTimes, FaChartLine } from 'react-icons/fa';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -88,7 +88,7 @@ export function Header() {
               <FaTimes className="w-6 h-6" />
             </button>
             <nav className="space-y-4">
-              <Link href="#" className="flex items-center gap-2" prefetch={false}>
+              <Link href="/" className="flex items-center gap-2" prefetch={false}>
                 <FaCamera className="w-5 h-5" />
                 <span>Dashboard</span>
               </Link>
@@ -97,8 +97,20 @@ export function Header() {
                 <span>Cameras</span>
               </Link>
               <Link href="#" className="flex items-center gap-2" prefetch={false}>
+                <FaChartLine className="w-5 h-5" />
+                <span>Analytics</span>
+              </Link>
+              <Link href="#" className="flex items-center gap-2" prefetch={false}>
                 <FaCog className="w-5 h-5" />
                 <span>Settings</span>
+              </Link>
+              <Link href="#" className="flex items-center gap-2" prefetch={false}>
+                <FaUserCircle className="w-5 h-5" />
+                <span>Profile</span>
+              </Link>
+              <Link href="#" className="flex items-center gap-2" prefetch={false}>
+                <FaSignOutAlt className="w-5 h-5" />
+                <span>Log out</span>
               </Link>
             </nav>
           </div>
