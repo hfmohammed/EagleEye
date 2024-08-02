@@ -1,12 +1,15 @@
 "use client";
-
-import React, { useState } from 'react';
-import DashboardPage from '@/components/dashboard-page';
 import Link from "next/link";
+import React, { useState } from 'react';
+
+import DashboardPage from '@/components/dashboard-page';
+import { Header } from "@/components/header"
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/login-card";
 import { Label } from "@/components/ui/login-label";
 import { Input } from "@/components/ui/login-input";
 import { Button } from "@/components/ui/login-button";
+
 
 export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -26,7 +29,15 @@ export default function Home() {
 
   return (
     <React.StrictMode>
-      {loggedIn ? <DashboardPage /> : <LoginPage onLogin={handleLogin} />}
+      {loggedIn ? (
+          <>
+            <Header />
+            <DashboardPage />
+          </>
+        ) : (
+          <LoginPage onLogin={handleLogin} />
+        )
+      }
     </React.StrictMode>
   );
 }
@@ -79,25 +90,6 @@ function MountainIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round">
       <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
-    </svg>
-  );
-}
-
-function XIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
     </svg>
   );
 }
