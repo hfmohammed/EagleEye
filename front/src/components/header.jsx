@@ -54,7 +54,7 @@ export function Header() {
                 className="rounded-full object-cover"
               />
             </button>
-            <div className="absolute right-0 mt-0 mr-11 w-32 bg-white text-gray-800 border border-gray-800 rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute right-0 mt-0 mr-0 mt-11 w-32 bg-white text-gray-800 border border-gray-800 rounded-md shadow-lg z-50 hidden group-hover:block transition-opacity duration-300">
               <ul>
                 <li className="flex items-center p-2 hover:bg-gray-300 cursor-pointer rounded-md" onClick={handleProfileClick}>
                   <FaUserCircle className="w-4 h-4 mr-2" />
