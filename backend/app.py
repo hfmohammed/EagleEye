@@ -5,6 +5,16 @@ import cv2 as cv
 import base64
 import sqlite3
 from datetime import datetime
+from supabase import create_client, Client
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+SUPABASE_PROJECT_URL = os.getenv("SUPABASE_PROJECT_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+print(SUPABASE_PROJECT_URL, SUPABASE_KEY)
+
+supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 
 DB_PATH = "video_data.db"
 
@@ -38,7 +48,7 @@ def create_table():
     CONN.commit()
 
 
-def insert_data(frame_number, current_data, uqCategories):
+def insert_data_sql(frame_number, current_data, uqCategories):
     print('inserting...', frame_number, current_data, uqCategories)
 
     CURSOR.execute(
@@ -49,6 +59,18 @@ def insert_data(frame_number, current_data, uqCategories):
         (frame_number, str(current_data), str(uqCategories))
     )
     CONN.commit()
+
+
+def insert_data(frame_number, current_data, uqCategories):
+    print('Inserting into Supabase...', frame_number, current_data, uqCategories)
+    data = {
+        "frame_number": frame_number,
+        "timestamp": datetime.now().isoformat(),
+        "current_data": str(current_data),
+        "uqCategories": str(uqCategories)
+    }
+    response = supabase.table("videoData").insert(data).execute()
+    print("Insert response:", response)
 
 
 def processData(x: dict):
@@ -65,8 +87,14 @@ def yolo_annotate(frame):
     results = MODEL(frame)
     return results
 
+def erase_old_data():
+    print("Erasing old data...")
+    response = supabase.table("videoData").delete().neq("frame_number", 0).execute()
+    print("Erase response:", response)
+
 def capture_camera(source):
-    create_table()
+    erase_old_data()
+    socketio.sleep(5)
 
     print("_____DEBUG 2: called capture_camera_____")
     if source == "0":
@@ -88,6 +116,7 @@ def capture_camera(source):
             DATA[frameCount] = {
                 'Time': str(datetime.now().strftime("%H:%M:%S")),
             }
+
         else:
             DATA[frameCount] = {
                 'Time': str(datetime.now() - stime).split('.')[0],
