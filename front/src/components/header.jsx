@@ -11,14 +11,19 @@ export function Header() {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
+  const handleLogoutClick = () => {
+    router.push('/'); // Ensure this path matches your actual route
+  };
+
   const handleProfileClick = () => {
     router.push('/profile-settings'); // Ensure this path matches your actual route
   };
 
+  
   return (
-    <header className="sticky top-0 z-40 w-full text-white bg-gray-800 border-b">
+    <header className="sticky top-0 z-40 w-full text-white bg-gray-800">
       <div className="flex items-center justify-between h-14 px-4 w-full">
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
+        <Link href="/" className="flex items-center gap-2" prefetch={false}>
           <FaCamera className="w-6 h-6" />
           <span className="font-bold text-lg">CCTV Dashboard</span>
         </Link>
@@ -27,11 +32,11 @@ export function Header() {
             Dashboard
           </Link>
 
-          <Link href="#" className="hidden sm:inline-flex text-sm font-medium hover:underline" prefetch={false}>
+          <Link href="/cameras" className="hidden sm:inline-flex text-sm font-medium hover:underline" prefetch={false}>
             Cameras
           </Link>
 
-          <Link href="#" className="hidden sm:inline-flex text-sm font-medium hover:underline" prefetch={false}>
+          <Link href="/analytics" className="hidden sm:inline-flex text-sm font-medium hover:underline" prefetch={false}>
             Analytics
           </Link>
           <button
@@ -60,7 +65,7 @@ export function Header() {
                   <FaUserCircle className="w-4 h-4 mr-2" />
                   Profile
                 </li>
-                <li className="flex items-center p-2 hover:bg-gray-300 cursor-pointer rounded-md" onClick={() => {}}>
+                <li className="flex items-center p-2 hover:bg-gray-300 cursor-pointer rounded-md" onClick={handleLogoutClick}>
                   <FaSignOutAlt className="w-4 h-4 mr-2" />
                   Logout
                 </li>

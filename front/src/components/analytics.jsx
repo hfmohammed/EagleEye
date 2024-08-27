@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
@@ -35,15 +37,13 @@ ChartJS.register(
 // Connect to the backend on port 5001
 const socket = io("http://localhost:5001");
 
-const DashboardPage = () => {
-  const [imageSrc, setImageSrc] = useState("");
+export function Analytics () {
   const [currentData, setCurrentData] = useState({});
   const [DATA, setDATA] = useState([]);
   const [uqCategories, setUqCategories] = useState([]);
 
   useEffect(() => {
-    socket.on("video_frame", ({ frame, current_data, data, uqCategories }) => {
-      setImageSrc(`data:image/jpeg;base64,${frame}`);
+    socket.on("video_frame", ({ current_data, data, uqCategories }) => {
       setCurrentData(current_data);
       setDATA(data);
       setUqCategories(uqCategories);
@@ -126,90 +126,74 @@ const DashboardPage = () => {
 
   return (
     <>
-      <main className="dashboard-main">
-        <section className="video-section dash-page-vedios">
-          <div className="video-grid-col">
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
-          </div>
-
-          <div className="video-grid-col">
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
-          </div>
-        </section>
-
-        <section className="data-section">
-          <section className="data-subsection chart-section">
-            <section className="plots-grid">
-              <section className="plots-grid-row">
-                <div className="plot single-chart">
-                  <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
-                </div>
-              </section>
-
-              <section className="plots-grid-row">
-                <div className="plot double-chart">
-                  <Line data={lineChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-                </div>
-                <div className="plot double-chart">
-                  <Pie data={pieChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-                </div>
-              </section>
+      <main className="analytics-main">
+        <section className="data-subsection chart-section">
+        <section className="plots-grid">
+            <section className="plots-grid-row">
+            <div className="plot single-chart">
+                <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </div>
             </section>
-          </section>
-          <section className="data-subsection tab-section">
+
+            <section className="plots-grid-row">
+            <div className="plot double-chart">
+                <Line data={lineChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </div>
+            <div className="plot double-chart">
+                <Pie data={pieChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </div>
+            </section>
+        </section>
+        </section>
+        <section className="data-subsection tab-section">
             <Tabs>
-              <TabList>
+                <TabList>
                 <Tab>Current Data</Tab>
                 <Tab>All Data</Tab>
-              </TabList>
+                </TabList>
 
-              <TabPanel>
+                <TabPanel>
                 <table className="data-table">
-                  <thead>
+                    <thead>
                     <tr>
-                      {Object.keys(currentData).map((key) => (
+                        {Object.keys(currentData).map((key) => (
                         <th key={key}>{key}</th>
-                      ))}
+                        ))}
                     </tr>
-                  </thead>
-                  <tbody>
+                    </thead>
+                    <tbody>
                     <tr>
-                      {Object.values(currentData).map((value, index) => (
+                        {Object.values(currentData).map((value, index) => (
                         <td key={index}>{value}</td>
-                      ))}
+                        ))}
                     </tr>
-                  </tbody>
+                    </tbody>
                 </table>
-              </TabPanel>
-              <TabPanel>
+                </TabPanel>
+                <TabPanel>
                 <table className="data-table">
-                  <thead>
+                    <thead>
                     <tr>
-                      {uqCategories.map((category) => (
+                        {uqCategories.map((category) => (
                         <th key={category}>{category}</th>
-                      ))}
+                        ))}
                     </tr>
-                  </thead>
-                  <tbody>
+                    </thead>
+                    <tbody>
                     {Object.keys(DATA).map((frameNumber) => (
-                      <tr key={frameNumber}>
+                        <tr key={frameNumber}>
                         <td>{frameNumber}</td>
                         {uqCategories.map((category) => (
-                          category !== 'Frame' ? <td key={category}>{DATA[frameNumber][category] || 0}</td> : ''
+                            category !== 'Frame' ? <td key={category}>{DATA[frameNumber][category] || 0}</td> : ''
                         ))}
-                      </tr>
+                        </tr>
                     ))}
-                  </tbody>
+                    </tbody>
                 </table>
-              </TabPanel>
+                </TabPanel>
             </Tabs>
-          </section>
         </section>
       </main>
     </>
   );
 };
-
-export default DashboardPage;

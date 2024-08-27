@@ -3,33 +3,34 @@
   text-align: center;
 }
 
-.dashboard-header {
-  background-color: #1f2937; /* Darker background color */
-  padding: 10px 20px;
-  color: white;
-}
-
-.dashboard-header h3 {
-  margin: 0;
-  font-size: 1.5rem;
+.analytics-main {
+  height: calc(100vh - 56px - 50px);
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .dashboard-main {
-  height: calc(100vh - 70px);
+  height: calc(100vh - 56px - 50px);
   display: flex;
   flex-direction: row;
 }
 
+.cameras-page {
+  width: 100%;
+}
+
+.dash-page-vedios {
+  width: 50%;
+}
+
 .video-section {
   display: flex;
-  width: 50%;
   height: 100%;
   padding: 5px;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-color: #f9fafb; /* Light background color */
+  background-color: white; /* Light background color */
 }
 
 .video-grid-col {
@@ -55,7 +56,7 @@
   display: flex;
   width: 50%;
   flex-direction: column;
-  background-color: #f3f4f6; /* Slightly darker background for contrast */
+  background-color: rgb(246, 246, 246); /* Slightly darker background for contrast */
 }
 
 .data-subsection {
@@ -63,7 +64,7 @@
   display: flex;
   padding: 10px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: auto; /* Ensure both chart and tab sections can scroll */
 }
 
 .plots-grid {
@@ -71,6 +72,8 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  border: 2px solid #1f2937;
+  border-radius: 10px;
 }
 
 .plots-grid-row {
@@ -101,7 +104,6 @@
 
 footer {
   height: 50px;
-  background-color: #333;
   color: white;
   display: flex;
   align-items: center;
@@ -122,18 +124,32 @@ footer {
 
 /* Table Styling */
 .data-table {
+  background-color: rgb(246, 246, 246); /* Slightly darker background for contrast */
   width: 100%;
   border-collapse: collapse;
   margin: 10px 0;
   font-size: 0.9em;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  background-color: transparent;
 }
 
-.data-table thead tr {
-  background-color: #4a5568; /* Darker header background */
-  color: #ffffff;
-  text-align: left;
-  font-weight: bold;
+.data-table thead {
+  background-color: #1f2937; /* Darker header background */
+  color: white;
+}
+
+.data-table thead th {
+  border-top-left-radius: 0px; /* Rounded top-left corner */
+  border-top-right-radius: 0px; /* Rounded top-right corner */
+}
+
+/* If your table has more than one column */
+.data-table thead th:first-child {
+  border-top-left-radius: 10px; /* Only the first column header gets top-left radius */
+}
+
+.data-table thead th:last-child {
+  border-top-right-radius: 10px; /* Only the last column header gets top-right radius */
 }
 
 .data-table th,

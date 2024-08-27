@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 
 import DashboardPage from '@/components/dashboard-page';
 import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/login-card";
 import { Label } from "@/components/ui/login-label";
@@ -33,6 +34,7 @@ export default function Home() {
           <>
             <Header />
             <DashboardPage />
+            <Footer />
           </>
         ) : (
           <LoginPage onLogin={handleLogin} />
