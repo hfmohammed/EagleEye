@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/login-label";
 import { Input } from "@/components/ui/login-input";
 import { Button } from "@/components/ui/login-button";
 
-export default function Home() {
+export default function Home() {  
+  const [loggedIn, setLoggedIn] = useState(false);
+
   // Send a request to the backend to start the server
   try {
     const response = await fetch(`https://dasboard-construction.onrender.com/start-server`, { method: 'POST' });
@@ -21,8 +23,6 @@ export default function Home() {
   } catch (error) {
     console.error('Error starting server:', error);
   }
-  
-  const [loggedIn, setLoggedIn] = useState(false);
 
   const handleLogin = async () => {
     // Here you would typically check the credentials, 

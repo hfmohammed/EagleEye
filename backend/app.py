@@ -8,6 +8,7 @@ from datetime import datetime
 from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv()
 SUPABASE_PROJECT_URL = os.getenv("SUPABASE_PROJECT_URL")
@@ -19,6 +20,7 @@ supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 DB_PATH = "video_data.db"
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 # Initialize YOLO model
