@@ -182,7 +182,7 @@ def index():
 @app.route('/start-server', methods=['POST'])
 def start_server():
     source = "../resources/cars.mp4"
-    # source = "0"
+    source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
     return "Server started", 200
