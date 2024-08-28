@@ -19,7 +19,7 @@ supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 DB_PATH = "video_data.db"
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 # Initialize YOLO model
 MODEL = YOLO("yolov8n")
