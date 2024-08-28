@@ -33,7 +33,7 @@ ChartJS.register(
 );
 
 // Connect to the backend on port 5001
-const socket = io("http://localhost:5001");
+const socket = io("https://dasboard-construction.onrender.com");
 
 const DashboardPage = () => {
   const [imageSrc, setImageSrc] = useState("");

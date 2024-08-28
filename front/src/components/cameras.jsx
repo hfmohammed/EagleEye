@@ -3,7 +3,7 @@
 import io from "socket.io-client";
 import { useState, useEffect } from "react";
 
-const socket = io("http://localhost:5001");
+const socket = io("https://dasboard-construction.onrender.com");
 
 export function Cameras() {
   const [imageSrc, setImageSrc] = useState("");
