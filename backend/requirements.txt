@@ -3,4 +3,4 @@ Flask-SocketIO==5.3.4
 ultralytics==8.2.28
 opencv-python-headless==4.8.0.74
 python-dotenv==1.0.0
-supabase==0.8.0
+supabase==2.7.2
