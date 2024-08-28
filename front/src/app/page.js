@@ -3,14 +3,13 @@ import Link from "next/link";
 import React, { useState } from 'react';
 
 import DashboardPage from '@/components/dashboard-page';
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/login-card";
 import { Label } from "@/components/ui/login-label";
 import { Input } from "@/components/ui/login-input";
 import { Button } from "@/components/ui/login-button";
-
 
 export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -22,7 +21,10 @@ export default function Home() {
 
     // Send a request to the backend to start the server
     try {
-      await fetch('http://localhost:5001/start-server', { method: 'POST' });
+      const response = await fetch(`https://dasboard-construction.onrender.com/start-server`, { method: 'POST' });
+      if (!response.ok) {
+        throw new Error('Network response was not ok.');
+      }
     } catch (error) {
       console.error('Error starting server:', error);
     }
@@ -31,15 +33,14 @@ export default function Home() {
   return (
     <React.StrictMode>
       {loggedIn ? (
-          <>
-            <Header />
-            <DashboardPage />
-            <Footer />
-          </>
-        ) : (
-          <LoginPage onLogin={handleLogin} />
-        )
-      }
+        <>
+          <Header />
+          <DashboardPage />
+          <Footer />
+        </>
+      ) : (
+        <LoginPage onLogin={handleLogin} />
+      )}
     </React.StrictMode>
   );
 }
