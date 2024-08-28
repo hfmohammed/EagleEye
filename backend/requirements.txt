@@ -1,6 +1,6 @@
 Flask==2.3.2
 Flask-SocketIO==5.3.4
-ultralytics==8.0.20  # or your preferred version of YOLO
-opencv-python-headless==4.8.0.74  # version can be adjusted, this is typically used for headless environments like servers
+ultralytics==8.0.20
+opencv-python-headless==4.8.0.74
 python-dotenv==1.0.0
-supabase==0.8.0  # or your preferred version of the Supabase client
+supabase==0.8.0
