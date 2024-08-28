@@ -12,22 +12,22 @@ import { Input } from "@/components/ui/login-input";
 import { Button } from "@/components/ui/login-button";
 
 export default function Home() {
+  // Send a request to the backend to start the server
+  try {
+    const response = await fetch(`https://dasboard-construction.onrender.com/start-server`, { method: 'POST' });
+    if (!response.ok) {
+      throw new Error('Network response was not ok.');
+    }
+  } catch (error) {
+    console.error('Error starting server:', error);
+  }
+  
   const [loggedIn, setLoggedIn] = useState(false);
 
   const handleLogin = async () => {
     // Here you would typically check the credentials, 
     // but for this example, we'll just set loggedIn to true
     setLoggedIn(true);
-
-    // Send a request to the backend to start the server
-    try {
-      const response = await fetch(`https://dasboard-construction.onrender.com/start-server`, { method: 'POST' });
-      if (!response.ok) {
-        throw new Error('Network response was not ok.');
-      }
-    } catch (error) {
-      console.error('Error starting server:', error);
-    }
   };
 
   return (
