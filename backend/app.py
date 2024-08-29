@@ -22,7 +22,7 @@ DB_PATH = "video_data.db"
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 # Initialize YOLO model
 MODEL = YOLO("yolov8n")
@@ -184,6 +184,7 @@ def index():
 def start_server():
     source = "../resources/cars.mp4"
     source = "https://www.youtube.com/watch?v=uws-tnl95hc&pp=ygURY2FyIHJhY2luZyAyIG1pbnM%3D"
+    source = "test"
     # source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
