@@ -10,6 +10,7 @@ from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
+import numpy as np
 
 load_dotenv()
 SUPABASE_PROJECT_URL = os.getenv("SUPABASE_PROJECT_URL")
