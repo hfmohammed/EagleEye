@@ -7,3 +7,4 @@ supabase==2.7.2
 eventlet
 flask-cors
 pytube
+numpy
