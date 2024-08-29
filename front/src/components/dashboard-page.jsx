@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import "../styles/dashboard.css";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,6 +17,7 @@ import {
   PointElement,
 } from "chart.js";
 import { Bar, Pie, Line } from "react-chartjs-2";
+import Head from "next/head";
 
 // Register Chart.js components
 ChartJS.register(
@@ -31,7 +33,7 @@ ChartJS.register(
 );
 
 // Connect to the backend on port 5001
-const socket = io("https://dasboard-construction.onrender.com");
+const socket = io("http://localhost:5001");
 
 const DashboardPage = () => {
   const [imageSrc, setImageSrc] = useState("");
@@ -71,37 +73,8 @@ const DashboardPage = () => {
     return () => window.removeEventListener("resize", adjustCanvasSize);
   }, []);
 
-  // Capture frame from video element and send to backend
-  const captureFrame = () => {
-    const videoElement = document.getElementById("video");
-    const canvas = document.createElement("canvas");
-    canvas.width = videoElement.width;
-    canvas.height = videoElement.height;
-
-    const context = canvas.getContext("2d");
-    context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-    const imageData = canvas.toDataURL("image/jpeg");
-    return imageData;
-  };
-
-  const sendFrameToBackend = () => {
-    const imageData = captureFrame();
-    socket.emit("processed_frame", { frame: imageData });
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      sendFrameToBackend();
-    }, 5000); // Send frame every 5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Prepare data for bar and pie charts
-  const labels = Object.keys(currentData).filter(
-    (key) => key !== "Time" && key !== "Frame"
-  );
+  const labels = Object.keys(currentData).filter((key) => key !== "Time" && key !== "Frame");
   const data = labels.map((label) => currentData[label]);
 
   const chartData = {
@@ -137,36 +110,32 @@ const DashboardPage = () => {
   const frameNumbers = Object.keys(DATA);
 
   const lineChartData = {
-    labels: frameNumbers.map(
-      (frameNumber) => DATA[frameNumber]["Time"]
-    ),
+    // labels: frameNumbers,
+    labels: frameNumbers.map((frameNumber) => DATA[frameNumber]['Time']),
     datasets: uqCategories
-      .filter((category) => category !== "Time" && category !== "Frame")
-      .map((category, index) => ({
-        label: category,
-        data: frameNumbers.map(
-          (frameNumber) => DATA[frameNumber][category] || 0
-        ),
-        borderColor: `hsl(${(index * 360) / uqCategories.length}, 70%, 50%)`,
-        backgroundColor: `hsla(${(index * 360) / uqCategories.length}, 70%, 80%, 0.2)`,
-        fill: false,
-      })),
+    .filter((category) => category !== "Time" && category !== "Frame")
+    .map((category, index) => ({
+      label: category,
+      data: frameNumbers
+        .map((frameNumber) => DATA[frameNumber][category] || 0),
+      borderColor: `hsl(${(index * 360) / uqCategories.length}, 70%, 50%)`,
+      backgroundColor: `hsla(${(index * 360) / uqCategories.length}, 70%, 80%, 0.2)`,
+      fill: false,
+    })),
   };
-
-  const frameSrc = 0;
 
   return (
     <>
       <main className="dashboard-main">
         <section className="video-section dash-page-vedios">
           <div className="video-grid-col">
-            <img className="video" id="video" src={frameSrc} alt="Video Stream" />
-            <img className="video" id="video" src={frameSrc} alt="Video Stream" />
+            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
+            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
           </div>
 
           <div className="video-grid-col">
-            <img className="video" id="video" src={frameSrc} alt="Video Stream" />
-            <img className="video" id="video" src={frameSrc} alt="Video Stream" />
+            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
+            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
           </div>
         </section>
 
@@ -227,15 +196,9 @@ const DashboardPage = () => {
                     {Object.keys(DATA).map((frameNumber) => (
                       <tr key={frameNumber}>
                         <td>{frameNumber}</td>
-                        {uqCategories.map((category) =>
-                          category !== "Frame" ? (
-                            <td key={category}>
-                              {DATA[frameNumber][category] || 0}
-                            </td>
-                          ) : (
-                            ""
-                          )
-                        )}
+                        {uqCategories.map((category) => (
+                          category !== 'Frame' ? <td key={category}>{DATA[frameNumber][category] || 0}</td> : ''
+                        ))}
                       </tr>
                     ))}
                   </tbody>
