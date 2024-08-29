@@ -9,6 +9,7 @@ from datetime import datetime
 from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv()
 SUPABASE_PROJECT_URL = os.getenv("SUPABASE_PROJECT_URL")
@@ -20,6 +21,7 @@ supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 DB_PATH = "video_data.db"
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize YOLO model
@@ -31,36 +33,6 @@ def connect_db():
 
 CONN = connect_db()
 CURSOR = CONN.cursor()
-
-def create_table():
-    CURSOR.execute("""
-        DROP TABLE IF EXISTS videoData;
-    """)
-    
-    CURSOR.execute("""
-        CREATE TABLE IF NOT EXISTS videoData (
-            frame_number INTEGER PRIMARY KEY NOT NULL,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            current_data TEXT NOT NULL,
-            uqCategories TEXT NOT NULL
-        );
-    """)
-
-    CONN.commit()
-
-
-def insert_data_sql(frame_number, current_data, uqCategories):
-    print('inserting...', frame_number, current_data, uqCategories)
-
-    CURSOR.execute(
-        """
-        INSERT INTO videoData (frame_number, current_data, uqCategories)
-        VALUES (?, ?, ?)
-        """,
-        (frame_number, str(current_data), str(uqCategories))
-    )
-    CONN.commit()
-
 
 def insert_data(frame_number, current_data, uqCategories):
     print('Inserting into Supabase...', frame_number, current_data, uqCategories)
