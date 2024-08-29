@@ -21,7 +21,7 @@ supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 DB_PATH = "video_data.db"
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "https://dasboard-construction-mhbt.vercel.app"}})
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 # Initialize YOLO model
