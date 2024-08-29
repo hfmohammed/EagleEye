@@ -71,13 +71,38 @@ def capture_camera(source):
 
     print("_____DEBUG 2: called capture_camera_____")
 
-    if "youtube.com" in source or "youtu.be" in source:
+    if source == 'test':
+        print("Displaying red frames for testing.")
+        while True:
+            # Create a red frame
+            red_frame = np.zeros((480, 640, 3), dtype=np.uint8)  # Adjust size as needed
+            red_frame[:, :, 2] = 255  # Set the red channel to maximum
+
+            # Convert the frame to base64
+            _, buffer = cv.imencode('.jpg', red_frame)
+            frame_data = base64.b64encode(buffer).decode('utf-8')
+            print("_____DEBUG 7: Red frame is converted to binary_____")
+
+            # Emit the frame data to the frontend
+            uqCategories = processData(DATA)
+            socketio.emit('video_frame', {
+                'frame': frame_data,
+                'current_data': {},
+                'data': DATA,
+                'uqCategories': uqCategories,
+            })
+
+            socketio.sleep(1)  # Adjust sleep time as needed
+
+    elif "youtube.com" in source or "youtu.be" in source:
         print(f"Downloading video from YouTube: {source}")
         yt = YouTube(source)
         stream = yt.streams.get_highest_resolution()
+
         video_path = stream.download()
         print(f"Video downloaded to: {video_path}")
         cap = cv.VideoCapture(video_path)
+
     else:
         if source == "0":
             source = 0
@@ -86,7 +111,7 @@ def capture_camera(source):
     if not cap.isOpened():
         print("_____DEBUG 3: Error: Unable to open video source._____")
         return
-    
+
     print("_____DEBUG 4: Cap is opened!_____")
     stime = datetime.now()
     frameCount = 1
@@ -104,50 +129,46 @@ def capture_camera(source):
                 'Time': str(datetime.now() - stime).split('.')[0],
             }
 
-
         ret, frame = cap.read()
         if not ret:
             print("_____DEBUG 5: Failed to grab frame or end of video reached._____")
             break
 
+        # Apply red filter if not in 'test' mode
+        if source != 'test':
+            results = MODEL(frame)
 
-        results = MODEL(frame)
+            for result in results[0].boxes:
+                classId = int(result.cls)
+                className = MODEL.names[classId]
 
-        for result in results[0].boxes:
-            classId = int(result.cls)
-            className = MODEL.names[classId]
+                if className not in DATA[frameCount]:
+                    DATA[frameCount][className] = 0
+                DATA[frameCount][className] += 1
 
-            if className not in DATA[frameCount]:
-                DATA[frameCount][className] = 0
-            DATA[frameCount][className] += 1
+                x1, y1, x2, y2 = map(int, result.xyxy[0])
+                conf = result.conf[0]
 
-            x1, y1, x2, y2 = map(int, result.xyxy[0])
-            conf = result.conf[0]
+                cv.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                cv.putText(frame, f'{className} {conf:.2f}', (x1, y1 - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
 
-            cv.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            cv.putText(frame, f'{className} {conf:.2f}', (x1, y1 - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+            print("_____DEBUG 6: for loop ended____")
+            _, buffer = cv.imencode('.jpg', frame)
+            frame_data = base64.b64encode(buffer).decode('utf-8')
+            print("_____DEBUG 7: frame is converted to binary_____")
 
-        print("_____DEBUG 6: for loop ended____")
-        _, buffer = cv.imencode('.jpg', frame)
-        frame_data = base64.b64encode(buffer).decode('utf-8')
-        print("_____DEBUG 7: frame is converted to binary_____")
-        
+            # Emit the frame data and annotated results to the frontend
+            uqCategories = processData(DATA)
 
-        # Emit the frame data and annotated results to the frontend
-        uqCategories = processData(DATA)
+            socketio.emit('video_frame', {
+                'frame': frame_data,
+                'current_data': DATA[frameCount],
+                'data': DATA,
+                'uqCategories': uqCategories,
+            })
 
-        socketio.emit('video_frame', {
-            'frame': frame_data,
-            'current_data': DATA[frameCount],
-            'data': DATA,
-            'uqCategories': uqCategories,
+            insert_data(frameCount, DATA[frameCount], uqCategories)
 
-        })
-
-        insert_data(frameCount, DATA[frameCount], uqCategories)
-
-        # Sleep to reduce the frame rate (optional)
-        # socketio.sleep(0.1)
         frameCount += 1
 
     CURSOR.close()

@@ -34,7 +34,8 @@ export default function Home() {
 
   return (
     <React.StrictMode>
-      {loggedIn ? (
+      {/* {loggedIn ? ( */}
+      {1 ? (
         <>
           <Header />
           <DashboardPage />
