@@ -15,6 +15,7 @@ export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const connect = async () => {
+    console.log("connecting")
     try {
       const response = await fetch(`https://dasboard-construction.onrender.com/start-server`, { method: 'POST' });
       if (!response.ok) {
