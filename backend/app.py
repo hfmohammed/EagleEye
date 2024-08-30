@@ -185,7 +185,7 @@ def index():
 def start_server():
     source = "../resources/cars.mp4"
     source = "https://www.youtube.com/watch?v=uws-tnl95hc&pp=ygURY2FyIHJhY2luZyAyIG1pbnM%3D"
-    source = "test"
+    # source = "test"
     # source = "0"
     print(f"______DEBUG 1: source: {source}______")
     socketio.start_background_task(capture_camera, source)
