@@ -11,6 +11,7 @@ import os
 from dotenv import load_dotenv
 from flask_cors import CORS
 import numpy as np
+import pafy
 
 load_dotenv()
 SUPABASE_PROJECT_URL = os.getenv("SUPABASE_PROJECT_URL")
@@ -97,12 +98,9 @@ def capture_camera(source):
 
     elif "youtube.com" in source or "youtu.be" in source:
         print(f"Downloading video from YouTube: {source}")
-        yt = YouTube(source)
-        stream = yt.streams.get_highest_resolution()
-
-        video_path = stream.download()
-        print(f"Video downloaded to: {video_path}")
-        cap = cv.VideoCapture(video_path)
+        video = pafy.new(source)
+        best = video.getbest(preftype="mp4")
+        cap = cv.VideoCapture(best.url)
 
     else:
         if source == "0":
