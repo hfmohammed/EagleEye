@@ -1,4 +1,3 @@
-from pytube import YouTube
 from flask_cors import CORS
 import numpy as np
 from flask import Flask
