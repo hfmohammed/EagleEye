@@ -21,18 +21,18 @@ const Camera = () => {
     startCamera();
   }, []);
 
-  useEffect(() => {
-    // Start capturing frames every 50 milliseconds
-    const intervalId = setInterval(() => {
-      captureImage();
-    }, 50);
+//   useEffect(() => {
+//     // Start capturing frames every 50 milliseconds
+//     const intervalId = setInterval(() => {
+//       captureImage();
+//     }, 50);
 
-    // Cleanup function to clear the interval and disconnect the socket
-    return () => {
-      clearInterval(intervalId);
-      socket.disconnect();
-    };
-  }, []);
+//     // Cleanup function to clear the interval and disconnect the socket
+//     return () => {
+//       clearInterval(intervalId);
+//       socket.disconnect();
+//     };
+//   }, []);
 
   const captureImage = () => {
     console.log("Capturing image..."); // Debug log
