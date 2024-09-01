@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import "../styles/dashboard.css";
+import Camera from "@/components/camera";
 
 import {
   Chart as ChartJS,
@@ -32,8 +33,8 @@ ChartJS.register(
   PointElement
 );
 
-// Connect to the backend on port https://dasboard-construction.onrender.com
-const socket = io("https://dasboard-construction.onrender.com");
+// Connect to the backend on port 5001
+const socket = io("http://localhost:5001");
 
 const DashboardPage = () => {
   const [imageSrc, setImageSrc] = useState("");
@@ -129,12 +130,10 @@ const DashboardPage = () => {
       <main className="dashboard-main">
         <section className="video-section dash-page-vedios">
           <div className="video-grid-col">
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
+            <Camera />
           </div>
 
           <div className="video-grid-col">
-            <img className="video" id="video" src={imageSrc} alt="Video Stream" />
             <img className="video" id="video" src={imageSrc} alt="Video Stream" />
           </div>
         </section>
