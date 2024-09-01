@@ -59,8 +59,6 @@ def erase_old_data():
     response = supabase.table("videoData").delete().neq("frame_number", 0).execute()
     print("Erase response:", response)
 
-import cv2 as cv
-import numpy as np
 
 @socketio.on('frame')
 def handle_frame(frame):
