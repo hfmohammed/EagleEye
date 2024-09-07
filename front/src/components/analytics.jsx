@@ -34,7 +34,6 @@ ChartJS.register(
   PointElement
 );
 
-// Connect to the backend on port 5001
 const socket = io("https://dasboard-construction.onrender.com", {
   transports: ['websocket'],
   upgrade: false,
