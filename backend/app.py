@@ -20,22 +20,10 @@ supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
 # Configure CORS
-CORS(app, resources={r"/*": {
-    "origins": [
-        "https://dasboard-construction-mhbt.vercel.app",
-        "https://dasboard-construction-mhbt-5mj5pflos.vercel.app",
-        "https://dasboard-construction-mhbt-ilq54pc70.vercel.app"
-    ],
-    "methods": ["GET", "POST"],
-    "allow_headers": ["Content-Type", "Authorization"]
-}})
+# Configure CORS with wildcard
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Configure SocketIO
-socketio = SocketIO(app, cors_allowed_origins=[
-    "https://dasboard-construction-mhbt.vercel.app",
-    "https://dasboard-construction-mhbt-5mj5pflos.vercel.app",
-    "https://dasboard-construction-mhbt-ilq54pc70.vercel.app"
-], async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 FRAME_COUNT = 0
 S_TIME = -1
@@ -44,7 +32,6 @@ SOURCE = 0
 # Initialize YOLO model
 MODEL = YOLO("yolov8n")
 DATA = {}
-
 
 def insert_data(frame_number, current_data, uqCategories):
     print('Inserting into Supabase...', frame_number, current_data, uqCategories)

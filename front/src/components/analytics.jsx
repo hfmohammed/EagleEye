@@ -37,7 +37,6 @@ ChartJS.register(
 const socket = io("https://dasboard-construction.onrender.com", {
   transports: ['websocket'],
   upgrade: false,
-  withCredentials: true,
 });
 
 export function Analytics () {

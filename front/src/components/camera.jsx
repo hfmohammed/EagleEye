@@ -4,7 +4,6 @@ import io from "socket.io-client";
 const socket = io("https://dasboard-construction.onrender.com", {
   transports: ['websocket'],
   upgrade: false,
-  withCredentials: true,
 });
 
 const Camera = () => {
