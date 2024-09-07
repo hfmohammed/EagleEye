@@ -1,7 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("https://dasboard-construction.onrender.com");
+const socket = io("https://dasboard-construction.onrender.com", {
+  transports: ['websocket'],
+  upgrade: false,
+  withCredentials: true,
+});
 
 const Camera = () => {
   const videoRef = useRef(null);

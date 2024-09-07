@@ -19,8 +19,23 @@ supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["https://dasboard-construction-mhbt.vercel.app", "https://dasboard-construction-mhbt-ilq54pc70.vercel.app"]}})
-socketio = SocketIO(app, cors_allowed_origins=["https://dasboard-construction-mhbt.vercel.app", "https://dasboard-construction-mhbt-ilq54pc70.vercel.app"])
+# Configure CORS
+CORS(app, resources={r"/*": {
+    "origins": [
+        "https://dasboard-construction-mhbt.vercel.app",
+        "https://dasboard-construction-mhbt-5mj5pflos.vercel.app",
+        "https://dasboard-construction-mhbt-ilq54pc70.vercel.app"
+    ],
+    "methods": ["GET", "POST"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}})
+
+# Configure SocketIO
+socketio = SocketIO(app, cors_allowed_origins=[
+    "https://dasboard-construction-mhbt.vercel.app",
+    "https://dasboard-construction-mhbt-5mj5pflos.vercel.app",
+    "https://dasboard-construction-mhbt-ilq54pc70.vercel.app"
+], async_mode='eventlet')
 
 FRAME_COUNT = 0
 S_TIME = -1

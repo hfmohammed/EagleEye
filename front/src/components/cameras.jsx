@@ -3,7 +3,11 @@
 import io from "socket.io-client";
 import { useState, useEffect } from "react";
 
-const socket = io("https://dasboard-construction.onrender.com");
+const socket = io("https://dasboard-construction.onrender.com", {
+  transports: ['websocket'],
+  upgrade: false,
+  withCredentials: true,
+});
 
 export function Cameras() {
   const [imageSrc, setImageSrc] = useState("");
