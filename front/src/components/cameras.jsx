@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import Camera from "./Camera"; // Assuming the Camera component is in a separate file
 
-const socket = io("https://dasboard-construction.onrender.com", {
+const socket = io("http://52.90.252.48:5001", {
   transports: ['websocket'],
   upgrade: false,
 });
