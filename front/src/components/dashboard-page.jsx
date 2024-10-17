@@ -39,6 +39,14 @@ const socket = io("http://52.90.252.48:5001", {
   upgrade: false,
 });
 
+socket.on("connect", () => {
+  console.log("Connected to the server");
+});
+
+socket.on("connect_error", (error) => {
+  console.error("Connection Error:", error);
+});
+
 const DashboardPage = () => {
   const [imageSrc, setImageSrc] = useState("");
   const [currentData, setCurrentData] = useState({});
