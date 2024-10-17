@@ -1,4 +1,3 @@
-import numpy as np
 from flask import Flask
 from flask_socketio import SocketIO, emit
 from ultralytics import YOLO
@@ -53,10 +52,11 @@ def processData(x: dict):
 
 def erase_old_data():
     print("Erasing old data...")
-    response = supabase.table("videoData").delete().neq(
-        "frame_number", 0).execute()
+    response = supabase.table("videoData").delete().neq("frame_number", 0).execute()
     print("Erase response:", response)
 
+import cv2 as cv
+import numpy as np
 
 @socketio.on('frame')
 def handle_frame(frame):
@@ -107,8 +107,7 @@ def handle_frame(frame):
                 conf = result.conf[0]
 
                 cv.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                cv.putText(image, f'{className} {
-                           conf:.2f}', (x1, y1 - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+                cv.putText(image, f'{className} {conf:.2f}', (x1, y1 - 10), cv.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
 
             print("_____DEBUG 6: for loop ended____")
             _, buffer = cv.imencode('.jpg', image)
@@ -127,7 +126,7 @@ def handle_frame(frame):
             })
 
             insert_data(FRAME_COUNT, DATA[FRAME_COUNT], uqCategories)
-
+            
         else:
             print("DEBUG 125: Failed to decode image")
 
@@ -143,7 +142,6 @@ def index():
 @app.route('/start-server', methods=['POST'])
 def start_server():
     return "Server started", 200
-
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5001)
