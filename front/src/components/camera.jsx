@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5001"); // Connect to your backend
+const socket = io("http://52.90.252.48:5001"); // Connect to your backend
 
 const Camera = () => {
   const videoRef = useRef(null);
