@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import Camera from "./Camera"; // Assuming the Camera component is in a separate file
 
-const socket = io("http://localhost:5001");
+const socket = io("https://dasboard-construction.onrender.com", {
+  transports: ['websocket'],
+  upgrade: false,
+});
 
 export function Cameras() {
   const [streams, setStreams] = useState({
