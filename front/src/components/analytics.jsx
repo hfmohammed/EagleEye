@@ -34,7 +34,7 @@ ChartJS.register(
   PointElement
 );
 
-const socket = io("http://52.90.252.48:5001", {
+const socket = io("http://localhost:5001", {
   transports: ['websocket'],
   upgrade: false,
 });
