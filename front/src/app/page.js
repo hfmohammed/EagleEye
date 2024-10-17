@@ -17,7 +17,7 @@ export default function Home() {
   const connect = async () => {
     console.log("connecting")
     try {
-      const response = await fetch(`https://dasboard-construction.onrender.com/start-server`, { method: 'POST' });
+      const response = await fetch(`http://52.90.252.48:5001/start-server`, { method: 'POST' });
       if (!response.ok) {
         throw new Error('Network response was not ok.');
       }

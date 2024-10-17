@@ -34,7 +34,7 @@ ChartJS.register(
 );
 
 // Connect to the backend on port https://dasboard-construction.onrender.com
-const socket = io("https://dasboard-construction.onrender.com", {
+const socket = io("http://52.90.252.48:5001", {
   transports: ['websocket'],
   upgrade: false,
 });
