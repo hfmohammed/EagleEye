@@ -1,5 +1,3 @@
-from flask_cors import CORS
-import numpy as np
 from flask import Flask
 from flask_socketio import SocketIO, emit
 from ultralytics import YOLO
@@ -17,13 +15,8 @@ print(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 
 supabase: Client = create_client(SUPABASE_PROJECT_URL, SUPABASE_KEY)
 
-
 app = Flask(__name__)
-# Configure CORS
-# Configure CORS with wildcard
-CORS(app, resources={r"/*": {"origins": "*"}})
-
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 FRAME_COUNT = 0
 S_TIME = -1
@@ -32,6 +25,7 @@ SOURCE = 0
 # Initialize YOLO model
 MODEL = YOLO("yolov8n")
 DATA = {}
+
 
 def insert_data(frame_number, current_data, uqCategories):
     print('Inserting into Supabase...', frame_number, current_data, uqCategories)
@@ -61,6 +55,8 @@ def erase_old_data():
     response = supabase.table("videoData").delete().neq("frame_number", 0).execute()
     print("Erase response:", response)
 
+import cv2 as cv
+import numpy as np
 
 @socketio.on('frame')
 def handle_frame(frame):

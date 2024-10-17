@@ -1,76 +1,60 @@
-import React, { useRef, useEffect, useState } from "react";
+// Camera.js
+import React, { useRef, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("https://dasboard-construction.onrender.com", {
-  transports: ['websocket'],
-  upgrade: false,
-});
+const socket = io("http://localhost:5001"); // Connect to your backend
 
 const Camera = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [isStreaming, setIsStreaming] = useState(false);
 
   useEffect(() => {
     const startCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            setIsStreaming(true);
-          };
-        }
+        videoRef.current.srcObject = stream;
       } catch (err) {
         console.error("Error accessing the camera: ", err);
       }
     };
 
     startCamera();
-
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-      }
-    };
   }, []);
 
-  useEffect(() => {
-    let intervalId;
+  // useEffect(() => {
+  //   // Start capturing frames every 50 milliseconds
+  //   const intervalId = setInterval(() => {
+  //     captureImage();
+  //   }, 50);
 
-    if (isStreaming) {
-      intervalId = setInterval(() => {
-        captureImage();
-      }, 50);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-      socket.disconnect();
-    };
-  }, [isStreaming]);
+  //   // Cleanup function to clear the interval and disconnect the socket
+  //   return () => {
+  //     clearInterval(intervalId);
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
   const captureImage = () => {
+    console.log("Capturing image..."); // Debug log
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (video && canvas) {
-      const context = canvas.getContext("2d");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const image = canvas.toDataURL("image/jpeg");
-      socket.emit("frame", { image });
-    }
+    const context = canvas.getContext("2d");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const image = canvas.toDataURL("image/jpeg");
+
+    // Emit the captured image to the backend
+    console.log("emitting..."); // Debug log
+    socket.emit("frame", { image });
   };
 
   return (
     <div>
       <video ref={videoRef} autoPlay playsInline></video>
+      <button onClick={captureImage}>Capture Frame</button>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-      <p>{isStreaming ? "Streaming..." : "Initializing camera..."}</p>
     </div>
   );
 };
