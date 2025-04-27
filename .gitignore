@@ -1,3 +1,5 @@
 .idea/
 backend/yolov8n.pt
 .env/
+venv/
+client/node_modules/
