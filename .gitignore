@@ -3,3 +3,7 @@ backend/yolov8n.pt
 .env/
 venv/
 client/node_modules/
+pycaches/
+client/build/
+__pycache__/
+yolov8n.pt
