@@ -2,16 +2,16 @@ import React from 'react';
 
 const Header = () => {
     return (
-        <header className='bg-gray-300 text-red-500 p-4 flex'>
-            <section>
-                <h1 className='bg-gray-800'>EagleEye</h1>
-            </section>
+        <header className="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+            {/* Logo Section */}
+            <h1 className="text-2xl font-bold text-gray-800">EagleEye</h1>
 
-            <section className='flex-1 flex justify-end'>
-                <button className='bg-red-500 px-2 py-1 text-white rounded pointer cursor-pointer'>Sign out</button>
-            </section>
+            {/* Sign Out Button */}
+            <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 hover:cursor-pointer">
+                Sign out
+            </button>
         </header>
-    )
-}
+    );
+};
 
 export default Header;

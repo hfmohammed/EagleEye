@@ -70,10 +70,15 @@ async def websocket_endpoint(ws: WebSocket):
 
             if elapsed_time >= 60:
                 fps = len(frame_times) / 60
-            elif elapsed_time >= 5:
+            elif elapsed_time >= 10:
                 recent_times = [t for t in frame_times if current_time - t <= 5]
                 elapsed_recent = current_time - recent_times[0] if len(recent_times) > 1 else 0
                 fps = len(recent_times) / elapsed_recent if elapsed_recent > 0 else None
+            elif elapsed_time >= 3:
+                recent_times = [t for t in frame_times if current_time - t <= 3]
+                elapsed_recent = current_time - recent_times[0] if len(recent_times) > 1 else 0
+                fps = len(recent_times) / elapsed_recent if elapsed_recent > 0 else None
+
             else:
                 fps = None
 
