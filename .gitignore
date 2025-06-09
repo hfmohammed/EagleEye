@@ -7,3 +7,4 @@ pycaches/
 client/build/
 __pycache__/
 yolov8n.pt
+
