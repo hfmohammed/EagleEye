@@ -64,8 +64,18 @@ async def websocket_endpoint(ws: WebSocket):
 
             # Remove frame times older than 1 minute
             frame_times = [t for t in frame_times if current_time - t <= 60]
+            
+            # Determine the time window to use
+            elapsed_time = current_time - frame_times[0] if frame_times else 0
 
-            fps = len(frame_times) / 60
+            if elapsed_time >= 60:
+                fps = len(frame_times) / 60
+            elif elapsed_time >= 5:
+                recent_times = [t for t in frame_times if current_time - t <= 5]
+                elapsed_recent = current_time - recent_times[0] if len(recent_times) > 1 else 0
+                fps = len(recent_times) / elapsed_recent if elapsed_recent > 0 else None
+            else:
+                fps = None
 
             # send data to the client
             await ws.send_text(json.dumps({

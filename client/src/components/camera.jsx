@@ -135,9 +135,9 @@ const Camera = ({ onDataUpdate }) => {
         <>
             <section className="camera flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1">
                 <div>
-                    {isStreaming ? <h1>Camera is streaming</h1> : <h1>Camera is not streaming</h1>}
-                    <h1>FPS set: {Number(import.meta.env.VITE_FPS) || 2}</h1>
-                    <h2>Detected Objects: {objectCount}</h2>
+                    {isStreaming ? <h1 class="text-center text-green-500">Camera is streaming</h1> : <h1 class="text-center text-red-500">Camera is not streaming</h1>}
+                    <h1 class="text-center text-red-500">FPS set: {Number(import.meta.env.VITE_FPS) || 2}</h1>
+                    <h2 class="text-center">Detected Objects: {objectCount}</h2>
                 </div>
 
                 <video
