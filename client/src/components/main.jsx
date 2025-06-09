@@ -83,17 +83,17 @@ function Main() {
 
           <div className="flex flex-col gap-6 flex-1 max-h-screen overflow-hidden">
             {/* Pie Chart */}
-            <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center">
+            <div className="bg-white rounded-2xl shadow p-4 flex flex-col center items-center">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">Category Share</h2>
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full flex items-center justify-center">
                 <Pie data={pieChartData} />
               </div>
             </div>
 
             {/* Line Chart */}
-            <div className="bg-white rounded-2xl shadow p-4 flex-1 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow p-4 flex-1 overflow-hidden flex flex-col center items-center">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">FPS Over Time</h2>
-              <div className="h-full w-full">
+              <div className="h-full w-full flex items-center justify-center">
                 <Line data={lineChartData} />
               </div>
             </div>
