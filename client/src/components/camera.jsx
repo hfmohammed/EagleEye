@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const Camera = () => {
+const Camera = ({ onDataUpdate }) => {
     const videoRef = useRef(null);
     const canvasOutputRef = useRef(null);
     const socket = useRef(null);
@@ -10,11 +10,12 @@ const Camera = () => {
 
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState(0);
+    const [annotations, setAnnotations] = useState([]);
 
     // Initialize websocket connection
     useEffect(() => {
-        console.log(process.env.REACT_APP_WEBSOCKET_URL);
-        socket.current = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
+        console.log(import.meta.env.VITE_WEBSOCKET_URL);
+        socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
 
         socket.current.onopen = () => {
             console.log("Socket connected");
@@ -39,9 +40,25 @@ const Camera = () => {
 
                 contextCvsOtp.clearRect(0, 0, outputFrameWidth, FRAME_HEIGHT);
                 contextCvsOtp.drawImage(image, 0, 0, outputFrameWidth, FRAME_HEIGHT);
+
+                // Draw annotations
+                message.annotations.forEach(annotation => {
+                    const { x1, y1, x2, y2, label, confidence } = annotation;
+                    contextCvsOtp.strokeStyle = 'red';
+                    contextCvsOtp.lineWidth = 2;
+                    contextCvsOtp.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+                    contextCvsOtp.fillStyle = 'green';
+                    contextCvsOtp.font = '12px Arial';
+                    contextCvsOtp.fillText(`${label} (${confidence.toFixed(2)})`, x1, y1 - 5);
+                });
             }
 
             setObjectCount(message.count);
+            setAnnotations(message.annotations);
+
+            // Pass data to the parent component
+            onDataUpdate(message);
         };
 
         return () => {
@@ -93,33 +110,35 @@ const Camera = () => {
         return new Promise((resolve) => {
             const contextCvsInp = canvasInputRef.current.getContext('2d');
             const inputRatio = image.width / image.height
-            const inputFrameWidth = FRAME_HEIGHT * inputRatio;
+            const inputFrameWidth = image.width;
+            const inputFrameHeight = image.height;
 
-            canvasInputRef.current.height = FRAME_HEIGHT;
+            canvasInputRef.current.height = inputFrameHeight;
             canvasInputRef.current.width = inputFrameWidth;
 
-            contextCvsInp.clearRect(0, 0, inputFrameWidth, FRAME_HEIGHT);
-            contextCvsInp.drawImage(image, 0, 0, inputFrameWidth, FRAME_HEIGHT);
+            contextCvsInp.clearRect(0, 0, inputFrameWidth, inputFrameHeight);
+            contextCvsInp.drawImage(image, 0, 0, inputFrameWidth, inputFrameHeight);
 
             contextCvsInp.canvas.toBlob((blob) => {
                 resolve(blob);
-            }, 'image/jpeg', 0.95);
+            }, 'image/jpeg', 0.99);
         });
     };
 
     // emit frames while attempting to main (skips frames if inflight) a constant FPS
     useEffect(() => {
-        const interval = setInterval(emitFrameToServer, 1000 / Number(process.env.REACT_APP_FPS) || 2);
+        const interval = setInterval(emitFrameToServer, 1000 / Number(import.meta.env.VITE_FPS) || 2);
         return () => clearInterval(interval);
     }, [emitFrameToServer]);
 
     return (
         <>
-            <section className="camera">
-                
-                {isStreaming ? <h1>Camera is streaming</h1> : <h1>Camera is not streaming</h1>}
-                <h1>FPS: {Number(process.env.REACT_APP_FPS) || 2}</h1>
-                <h2>Detected Objects: {objectCount}</h2>
+            <section className="camera flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1">
+                <div>
+                    {isStreaming ? <h1>Camera is streaming</h1> : <h1>Camera is not streaming</h1>}
+                    <h1>FPS set: {Number(import.meta.env.VITE_FPS) || 2}</h1>
+                    <h2>Detected Objects: {objectCount}</h2>
+                </div>
 
                 <video
                     ref={videoRef}
@@ -131,8 +150,7 @@ const Camera = () => {
                     />
 
                 <canvas ref={canvasInputRef} id="inputCanvas" style={{ display: 'none' }}></canvas>
-                <canvas ref={canvasOutputRef} id="outputCanvas"></canvas>
-            
+                <canvas ref={canvasOutputRef} id="outputCanvas" class="rounded w-full"></canvas>
             </section>
         </>
     );

@@ -3,7 +3,7 @@
 
 ### run frontend
 ```bash
-npm start
+npm run dev
 ```
 
 ### run WebSocket
