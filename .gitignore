@@ -7,4 +7,5 @@ pycaches/
 client/build/
 __pycache__/
 yolov8n.pt
+socket/yolov8n.pt
 
