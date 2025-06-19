@@ -1,4 +1,3 @@
-// context/DataContext.jsx
 import React, { createContext, useState } from 'react';
 
 export const DataContext = createContext();
@@ -13,7 +12,7 @@ export const DataProvider = ({ children }) => {
   const updateData = (newData) => {
     const currentTime = new Date().getTime();
 
-    setData((prevData) => ({
+    setData(( prevData ) => ({
       ...prevData,
       fpsData: [...prevData.fpsData, { time: currentTime, fps: newData.fps }].filter(
         (entry) => currentTime - entry.time <= 60000
@@ -27,7 +26,7 @@ export const DataProvider = ({ children }) => {
 
   return (
     <DataContext.Provider value={{ data, updateData }}>
-      {children}
+      { children }
     </DataContext.Provider>
   );
 };
