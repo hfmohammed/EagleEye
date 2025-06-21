@@ -7,9 +7,113 @@ from PIL import Image
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from ultralytics import YOLO
 import time
+import sys
+import asyncio
 
 app = FastAPI()
 model = YOLO("yolov8n.pt")
+
+@app.websocket("/rtsp")
+async def rtsp_websocket_endpoint(ws: WebSocket):
+    await ws.accept()
+    print("RTSP WebSocket connection established")
+
+    streaming_task = None
+    stream_active = False
+
+    async def stream_frames():
+        nonlocal stream_active
+        cap = cv2.VideoCapture("../resources/cars.mp4")
+        if not cap.isOpened():
+            await ws.send_text(json.dumps({"error": "Failed to open RTSP stream"}))
+            return
+
+        frame_times = []
+        print("Streaming loop started")
+
+        while stream_active:
+            ret, frame = cap.read()
+            if not ret:
+                await ws.send_text(json.dumps({"error": "Failed to read frame"}))
+                break
+
+            # === Apply YOLO or your processing ===
+            try:
+                results = model(frame, conf=0.2)
+                boxes = results[0].boxes
+                count = len(boxes)
+                annotations = []
+                category_counts = {}
+
+                for box in boxes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    cls = int(box.cls[0])
+                    conf = float(box.conf[0])
+                    label = model.names[cls]
+                    annotations.append({
+                        "x1": x1, "y1": y1, "x2": x2, "y2": y2,
+                        "label": label, "confidence": conf
+                    })
+                    category_counts[label] = category_counts.get(label, 0) + 1
+
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    cv2.putText(frame, f"{label} {conf:.2f}", (x1, y1 - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+                current_time = time.time()
+                frame_times.append(current_time)
+                frame_times = [t for t in frame_times if current_time - t <= 60]
+                fps = len(frame_times) / (current_time - frame_times[0]) if len(frame_times) > 1 else None
+
+                _, buf = cv2.imencode(".jpeg", frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                if buf is None:
+                    continue
+
+                jpeg_b64 = base64.b64encode(buf.tobytes()).decode("utf-8")
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
+
+                await ws.send_text(json.dumps({
+                    "image": jpeg_b64,
+                    "count": count,
+                    "annotations": annotations,
+                    "category_counts": category_counts,
+                    "timestamp": timestamp,
+                    "fps": fps
+                }))
+
+                await asyncio.sleep(0.1)
+
+            except Exception as e:
+                await ws.send_text(json.dumps({"error": f"YOLO error: {str(e)}"}))
+                break
+
+        cap.release()
+        print("Streaming loop ended")
+
+    try:
+        while True:
+            data = await ws.receive_text()
+            message = json.loads(data)
+            print("Received message:", message)
+
+            if message.get("action") == "begin_stream":
+                if not stream_active:
+                    stream_active = True
+                    streaming_task = asyncio.create_task(stream_frames())
+
+            elif message.get("action") == "stop_stream":
+                if stream_active:
+                    stream_active = False
+                    if streaming_task:
+                        await streaming_task  # wait for task to finish
+                        streaming_task = None
+
+    except WebSocketDisconnect:
+        print("RTSP WebSocket disconnected")
+        stream_active = False
+        if streaming_task:
+            await streaming_task
+
 
 
 @app.websocket("/ws")
@@ -83,6 +187,7 @@ async def websocket_endpoint(ws: WebSocket):
                 fps = None
 
             # send data to the client
+            print("-- webcam Frame sent to client --")
             await ws.send_text(json.dumps({
                 "image": jpeg_b64,
                 "count": count,
