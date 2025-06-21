@@ -1,19 +1,24 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { SettingsContext } from '../context/SettingsContext';
 
 const Camera = ({ onDataUpdate }) => {
     const videoRef = useRef(null);
     const canvasOutputRef = useRef(null);
     const socket = useRef(null);
-    const inFlight = useRef(false);
     const canvasInputRef = useRef(null);
+    const mediaStreamRef = useRef(null);
     const FRAME_HEIGHT = 200;
 
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState(0);
     const [annotations, setAnnotations] = useState([]);
+    const { isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight } = useContext(SettingsContext);
+    
 
     // Initialize websocket connection
     useEffect(() => {
+        if (!isCameraEnabled) return;
+
         console.log(import.meta.env.VITE_WEBSOCKET_URL);
         socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
 
@@ -62,12 +67,18 @@ const Camera = ({ onDataUpdate }) => {
         };
 
         return () => {
-            if (socket.current) socket.current.close();
+            if (socket.current) {
+                socket.current.close();
+                setIsStreaming(false);
+            }
         };
-    }, []);
+    }, [isCameraEnabled]);
 
     const emitFrameToServer = useCallback(() => {
+        console.log("Attempting to emit frame to server...");
+        console.log("In-flight status:", inFlight.current);
         if (inFlight.current) return;   // skip if inflight flag is true
+        console.log("Emitting frame to server...");
 
         const video = videoRef.current;
         if (video && video.srcObject) {
@@ -94,16 +105,58 @@ const Camera = ({ onDataUpdate }) => {
 
     // get access to the camera
     useEffect(() => {
+        if (!isCameraEnabled) {
+            // Cleanup existing stream when camera is disabled
+            if (mediaStreamRef.current) {
+                const tracks = mediaStreamRef.current.getTracks();
+                tracks.forEach(track => {
+                    if (track.enabled) {
+                        track.enabled = false;
+                    }
+                    if (track.readyState === 'live') {
+                        track.stop();
+                    }
+                });
+                mediaStreamRef.current = null;
+            }
+            if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.srcObject = null;
+            }
+            return;
+        }
+
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
+                mediaStreamRef.current = stream;
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                 }
             })
             .catch((error) => {
                 console.error("Error accessing media devices.", error);
+                setIsCameraEnabled(false);
             });
-    }, []);    
+
+        return () => {
+            if (mediaStreamRef.current) {
+                const tracks = mediaStreamRef.current.getTracks();
+                tracks.forEach(track => {
+                    if (track.enabled) {
+                        track.enabled = false;
+                    }
+                    if (track.readyState === 'live') {
+                        track.stop();
+                    }
+                });
+                mediaStreamRef.current = null;
+            }
+            if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.srcObject = null;
+            }
+        };
+    }, [isCameraEnabled]);
 
     // convert image to blob
     const imageToBlob = (image) => {
@@ -125,32 +178,79 @@ const Camera = ({ onDataUpdate }) => {
         });
     };
 
-    // emit frames while attempting to main (skips frames if inflight) a constant FPS
+    // emit frames while attempting to maintain constant FPS
     useEffect(() => {
+        console.log("Camera enabled:", isCameraEnabled);
+        if (!isCameraEnabled) return;
+
         const interval = setInterval(emitFrameToServer, 1000 / Number(import.meta.env.VITE_FPS) || 2);
+
         return () => clearInterval(interval);
-    }, [emitFrameToServer]);
+    }, [emitFrameToServer, isCameraEnabled]);
+
+    const _toggleCamera = () => {
+        toggleCamera();
+        inFlight.current = false;
+    };
 
     return (
         <>
-            <section className="camera flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1">
+            <section className='camera flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1'>
                 <div>
-                    {isStreaming ? <h1 class="text-center text-green-500">Camera is streaming</h1> : <h1 class="text-center text-red-500">Camera is not streaming</h1>}
-                    <h1 class="text-center text-red-500">FPS set: {Number(import.meta.env.VITE_FPS) || 2}</h1>
-                    <h2 class="text-center">Detected Objects: {objectCount}</h2>
+                    <button
+                        onClick={_toggleCamera}
+                        className={`px-4 py-2 rounded-lg font-semibold ${
+                            isCameraEnabled
+                                ? 'bg-red-500 hover:bg-red-600 text-white'
+                                : 'bg-green-500 hover:bg-green-600 text-white'
+                        }`}
+                    >
+                        {isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
+                    </button>
+                    
+                    {isStreaming ? (
+                        <h1 className='text-center text-green-500'>Camera is streaming</h1>
+                    ) : (
+                        <h1 className='text-center text-red-500'>Camera is not streaming</h1>
+                    )}
+                    <h1 className='text-center text-red-500'>FPS set: {Number(import.meta.env.VITE_FPS) || 2}</h1>
+                    <h2 className='text-center'>Detected Objects: {objectCount}</h2>
                 </div>
+                
+                {isCameraEnabled && (
+                    <div className='my-4 flex flex-col items-center'>
+                        <h3>Camera</h3>
+                        <video
+                            ref={videoRef}
+                            id='video'
+                            autoPlay
+                            className='rounded w-full'
+                            />
+                    </div>
+                )}
 
-                <video
-                    ref={videoRef}
-                    id="video"
-                    autoPlay
-                    height={200}
-                    width={500}
-                    style={{ display: 'none' }}
-                    />
+                
+                {isCameraEnabled && (
+                    <div className='my-4 flex flex-col items-center hidden'>
+                        <h3>Input Frame</h3>
+                        <canvas 
+                            ref={canvasInputRef} 
+                            id='inputCanvas'
+                            className='rounded w-full'
+                            ></canvas>
+                    </div>
+                )}
 
-                <canvas ref={canvasInputRef} id="inputCanvas" style={{ display: 'none' }}></canvas>
-                <canvas ref={canvasOutputRef} id="outputCanvas" class="rounded w-full"></canvas>
+                {isCameraEnabled && (
+                    <div className='my-4 flex flex-col items-center'>
+                        <h3>Output Frame</h3>
+                        <canvas
+                            ref={canvasOutputRef} 
+                            id='outputCanvas'
+                            class='rounded w-full'
+                            ></canvas>
+                    </div>
+                )}
             </section>
         </>
     );

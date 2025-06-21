@@ -4,15 +4,20 @@ import Main from './components/main'
 import Footer from './components/footer'
 import React from 'react'
 import { DataProvider } from './context/DataContext';
+import { SettingsProvider } from './context/SettingsContext';
 
 function App() {
   return (
     <>
+    <SettingsProvider>
       <Header />
+
       <DataProvider>
         <Main />
       </DataProvider>
+
       <Footer />
+    </SettingsProvider>
     </>
   )
 }
