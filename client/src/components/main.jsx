@@ -4,6 +4,7 @@ import PieChartCard from './PieChartCard';
 import LineChartCard from './LineChartCard';
 import DetectionTable from './DetectionTable';
 import { DataContext } from '../context/DataContext';
+import { SettingsContext } from '../context/SettingsContext';
 
 // main.jsx or App.jsx
 import {
@@ -31,8 +32,10 @@ ChartJS.register(
   Title
 );
 
+
 function Main() {
   const { data, updateData } = useContext(DataContext);
+  const { _isCameraEnabled } = useContext(SettingsContext);
 
   const pieChartData = {
     labels: Object.keys(data.category_counts || {}),
@@ -55,7 +58,11 @@ function Main() {
   return (
     <main className='min-h-screen bg-gray-100 p-6 overflow-hidden'>
       <div className='flex flex-row gap-6'>
-        <Camera onDataUpdate={updateData} />
+
+        {/* {isCameraEnabled && ( */}
+          <Camera onDataUpdate={updateData} />
+        {/* )} */}
+
         <div className='flex flex-col gap-6 flex-1 max-h-screen overflow-hidden'>
           <PieChartCard data={pieChartData} />
           <LineChartCard data={lineChartData} />

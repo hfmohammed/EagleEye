@@ -25,7 +25,7 @@ const Header = () => {
                 }
             `}>
 
-            {isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
+                {isCameraEnabled ? 'Switch to pre-recorded input or livestream' : 'Switch to Webcam'}
 
             </button>
         </>
