@@ -53,10 +53,10 @@ function Main() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6 overflow-hidden">
-      <div className="flex flex-row gap-6">
+    <main className='min-h-screen bg-gray-100 p-6 overflow-hidden'>
+      <div className='flex flex-row gap-6'>
         <Camera onDataUpdate={updateData} />
-        <div className="flex flex-col gap-6 flex-1 max-h-screen overflow-hidden">
+        <div className='flex flex-col gap-6 flex-1 max-h-screen overflow-hidden'>
           <PieChartCard data={pieChartData} />
           <LineChartCard data={lineChartData} />
         </div>
