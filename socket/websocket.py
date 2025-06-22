@@ -9,11 +9,37 @@ from ultralytics import YOLO
 import time
 import sys
 import asyncio
+import os
+from supabase import create_client, Client
+from dotenv import load_dotenv
+
 
 app = FastAPI()
 model = YOLO("yolov8n.pt")
 
-@app.websocket("/rtsp")
+load_dotenv()
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(supabase_url, supabase_key)
+
+
+def updateDatabase(category_counts, total_item_count, fps, timestamp):
+    print(category_counts, total_item_count, fps, timestamp)
+    if fps is None:
+        fps = 0
+
+    data = {
+        "time": timestamp,
+        "objects": category_counts,
+        "total_items": total_item_count,
+        "fps": fps,
+    }
+    response = supabase.table("EagleEye_traffic_data").insert(data).execute()
+    print("Database update response:", response)
+
+# http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000
+
+@app.websocket("/stream")
 async def rtsp_websocket_endpoint(ws: WebSocket):
     await ws.accept()
     print("RTSP WebSocket connection established")
@@ -21,9 +47,9 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
     streaming_task = None
     stream_active = False
 
-    async def stream_frames():
+    async def stream_frames(stream_url):
         nonlocal stream_active
-        cap = cv2.VideoCapture("../resources/cars.mp4")
+        cap = cv2.VideoCapture(stream_url)
         if not cap.isOpened():
             await ws.send_text(json.dumps({"error": "Failed to open RTSP stream"}))
             return
@@ -80,6 +106,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     "timestamp": timestamp,
                     "fps": fps
                 }))
+                updateDatabase(category_counts, count, fps, timestamp)
 
                 await asyncio.sleep(0.1)
 
@@ -96,10 +123,11 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
             message = json.loads(data)
             print("Received message:", message)
 
-            if message.get("action") == "begin_stream":
+            if message.get("action") == "BEGIN_STREAM":
+                stream_url = message.get("stream_url")
                 if not stream_active:
                     stream_active = True
-                    streaming_task = asyncio.create_task(stream_frames())
+                    streaming_task = asyncio.create_task(stream_frames(stream_url))
 
             elif message.get("action") == "stop_stream":
                 if stream_active:
@@ -116,7 +144,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
 
 
-@app.websocket("/ws")
+@app.websocket("/webcam")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
     frame_idx = 0
@@ -134,7 +162,7 @@ async def websocket_endpoint(ws: WebSocket):
             img = cv2.flip(img, 1)
 
             # run YOLO
-            results = model(img, conf=0.2)
+            results = model(img, conf=0.2, iou=0.1)
             boxes = results[0].boxes
 
             # handle data
@@ -188,14 +216,16 @@ async def websocket_endpoint(ws: WebSocket):
 
             # send data to the client
             print("-- webcam Frame sent to client --")
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
             await ws.send_text(json.dumps({
                 "image": jpeg_b64,
                 "count": count,
                 "annotations": annotations,
                 "category_counts": category_counts,
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time)),
+                "timestamp": timestamp,
                 "fps": fps
             }))
+            updateDatabase(category_counts, count, fps, timestamp)
 
     except WebSocketDisconnect:
         print("Client disconnected")

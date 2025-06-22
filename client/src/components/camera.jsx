@@ -12,7 +12,8 @@ const Camera = ({ onDataUpdate }) => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState(0);
     const [annotations, setAnnotations] = useState([]);
-    const { isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight } = useContext(SettingsContext);
+    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLink, fps } = useContext(SettingsContext);
+    // const s = "http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000";
     
 
     useEffect(() => {
@@ -24,8 +25,32 @@ const Camera = ({ onDataUpdate }) => {
                 socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_RTSP_URL);
     
                 socket.current.onopen = () => {
+                    // clear the canvas when the socket closes
+                    if (canvasOutputRef.current) {
+                        const ctx = canvasOutputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasOutputRef.current.width, canvasOutputRef.current.height);
+                    }
+                    if (canvasInputRef.current) {
+                        const ctx = canvasInputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasInputRef.current.width, canvasInputRef.current.height);
+                    }
+                    
+                    setSwitchSource(false);
                     console.log("Socket connected to RTSP stream");
                 };
+
+                socket.current.onclose = () => {
+                    // clear the canvas when the socket closes
+                    if (canvasOutputRef.current) {
+                        const ctx = canvasOutputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasOutputRef.current.width, canvasOutputRef.current.height);
+                    }
+                    if (canvasInputRef.current) {
+                        const ctx = canvasInputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasInputRef.current.width, canvasInputRef.current.height);
+                    }
+                    setSwitchSource(false);
+                }
     
                 socket.current.onmessage = (event) => {
 
@@ -38,7 +63,7 @@ const Camera = ({ onDataUpdate }) => {
                     
                     image.onload = () => {
                         if (!canvasOutputRef.current) return;
-                        console.log(canvasOutputRef.current);
+
                         const ctx = canvasOutputRef.current.getContext('2d');
                         const ratio = image.width / image.height;
                         const width = FRAME_HEIGHT * ratio;
@@ -58,8 +83,6 @@ const Camera = ({ onDataUpdate }) => {
                             ctx.font = '12px Arial';
                             ctx.fillText(`${label} (${confidence.toFixed(2)})`, x1, y1 - 5);
                         });
-
-                        inFlight.current = true;
                     };
                     
                     setObjectCount(message.count);
@@ -77,11 +100,12 @@ const Camera = ({ onDataUpdate }) => {
                     }, 100);
                 });
     
-                socket.current.send(JSON.stringify({ action: 'begin_stream' }));
+                socket.current.send(JSON.stringify({ action: 'BEGIN_STREAM', stream_url: `${rtspLink}` }));
                 setIsStreaming(true);
     
                 cleanup = () => {
                     console.log("Cleaning up rtsp socket connection...");
+                    setSwitchSource(true);
                     socket.current?.close();
                 };
             } else {
@@ -89,9 +113,33 @@ const Camera = ({ onDataUpdate }) => {
                 socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
     
                 socket.current.onopen = () => {
+                    // clear the canvas when the socket closes
+                    if (canvasOutputRef.current) {
+                        const ctx = canvasOutputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasOutputRef.current.width, canvasOutputRef.current.height);
+                    }
+                    if (canvasInputRef.current) {
+                        const ctx = canvasInputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasInputRef.current.width, canvasInputRef.current.height);
+                    }
+
+                    setSwitchSource(false);
                     console.log("Webcam Socket connected");
                     setIsStreaming(true);
                 };
+
+                socket.current.onclose = () => {
+                    // clear the canvas when the socket closes
+                    if (canvasOutputRef.current) {
+                        const ctx = canvasOutputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasOutputRef.current.width, canvasOutputRef.current.height);
+                    }
+                    if (canvasInputRef.current) {
+                        const ctx = canvasInputRef.current.getContext('2d');
+                        ctx.clearRect(0, 0, canvasInputRef.current.width, canvasInputRef.current.height);
+                    }
+                    setSwitchSource(false);
+                }
     
                 socket.current.onmessage = (event) => {
                     inFlight.current = false;
@@ -128,6 +176,7 @@ const Camera = ({ onDataUpdate }) => {
     
                 cleanup = () => {
                     console.log("Cleaning up webcam socket connection...");
+                    setSwitchSource(true);
                     socket.current?.close();
                     setIsStreaming(false);
                 };
@@ -148,6 +197,9 @@ const Camera = ({ onDataUpdate }) => {
 
         const video = videoRef.current;
         if (video && video.srcObject) {
+            inFlight.current = true; // set inflight flag to true
+
+
             const stream = video.srcObject;
 
             const videoTrack = stream.getVideoTracks()[0];
@@ -158,7 +210,6 @@ const Camera = ({ onDataUpdate }) => {
                 .then((imageBitmap) => {
                     imageToBlob(imageBitmap).then((blob) => {
                         if (socket.current.readyState === WebSocket.OPEN) {
-                            inFlight.current = true;    // inflight flag set to true
                             socket.current.send(blob);
                         }
                     });
@@ -252,32 +303,17 @@ const Camera = ({ onDataUpdate }) => {
         console.log("Camera enabled:", isCameraEnabled);
         if (!isCameraEnabled) return;
 
-        const interval = setInterval(emitFrameToServer, 1000 / Number(import.meta.env.VITE_FPS) || 2);
+        const interval = setInterval(emitFrameToServer, 1000 / fps);
 
         return () => clearInterval(interval);
-    }, [emitFrameToServer, isCameraEnabled]);
-
-    const _toggleCamera = () => {
-        toggleCamera();
-        inFlight.current = false;
-    };
+    }, [emitFrameToServer, isCameraEnabled, fps]);
 
     return (
         <>
             <section className='camera flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1'>
                 <div>
-                    {/* <button
-                        onClick={_toggleCamera}
-                        className={`px-4 py-2 rounded-lg font-semibold ${
-                            isCameraEnabled
-                                ? 'bg-red-500 hover:bg-red-600 text-white'
-                                : 'bg-green-500 hover:bg-green-600 text-white'
-                        }`}
-                    >
-                        {isCameraEnabled ? 'Switch to pre-recorded input or livestream' : 'Switch to Webcam'}
-                    </button> */}
                     
-                    {isStreaming ? (
+                    {isStreaming && !switchSource ? (
                         <>
                             {isCameraEnabled ? (
                                 <h1 className='text-center text-green-500'>Camera is streaming</h1>
@@ -286,7 +322,7 @@ const Camera = ({ onDataUpdate }) => {
                                 )
                             }
 
-                            <h1 className='text-center text-red-500'>FPS set: {Number(import.meta.env.VITE_FPS) || 2}</h1>
+                            <h1 className='text-center text-red-500'>FPS set: {fps}</h1>
                             <h2 className='text-center'>Detected Objects: {objectCount}</h2>
                         </>
                     ) : (
@@ -294,7 +330,7 @@ const Camera = ({ onDataUpdate }) => {
                     )}
                 </div>
                 
-                {isCameraEnabled && (
+                {isCameraEnabled && !switchSource && (
                     <div className='my-4 flex flex-col items-center'>
                         <h3>Camera</h3>
                         <video
@@ -307,7 +343,7 @@ const Camera = ({ onDataUpdate }) => {
                 )}
 
                 
-                {true && (
+                {!switchSource && (
                     <div className='my-4 flex flex-col items-center hidden'>
                         <h3>Input Frame</h3>
                         <canvas 
@@ -318,13 +354,13 @@ const Camera = ({ onDataUpdate }) => {
                     </div>
                 )}
 
-                {true && (
+                {!switchSource && (
                     <div className='my-4 flex flex-col items-center'>
                         <h3>Output Frame</h3>
                         <canvas
                             ref={canvasOutputRef} 
                             id='outputCanvas'
-                            class='rounded w-full'
+                            className='rounded w-full'
                             ></canvas>
                     </div>
                 )}
