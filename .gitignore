@@ -1,7 +1,6 @@
 .idea/
-backend/yolov8n.pt
 .env/
-venv/
+venv*
 client/node_modules/
 pycaches/
 client/build/
