@@ -1,24 +1,35 @@
-version: "3.9"
-
 services:
   client:
     build:
       context: ./client
     ports:
-      - "5173:5173"
+      - "80:5173"
     working_dir: /app
-    # volumes:
-    #   - ./client:/app
     environment:
       - CHOKIDAR_USEPOLLING=true
-    command: ["npm", "run", "dev", "--", "--host"]
+    command: ["npm", "run", "dev", "--", "--host", "::"]
+    networks:
+      - eagleeye-net
 
   backend:
     build:
       context: ./socket
     ports:
-      - "5700:5700"
+      - "[2605:fd00:4:1000:f816:3eff:fe47:4c5c]:5700:5700"
     working_dir: /app
     volumes:
       - ./socket:/app
-    command: ["uvicorn", "websocket:app", "--host", "0.0.0.0", "--port", "5700", "--reload"]
+    command: ["uvicorn", "websocket:app", "--host", "::", "--port", "5700", "--reload"]
+    networks:
+      - eagleeye-net
+
+networks:
+  eagleeye-net:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "2001:db8:1::/64"
+          gateway: "2001:db8:1::1"
+
