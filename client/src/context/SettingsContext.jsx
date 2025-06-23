@@ -8,7 +8,7 @@ export const SettingsProvider = ({ children }) => {
     });
 
     const [rtspLink, setRtspLink] = useState(() => {
-        return localStorage.getItem('rtspLink') || '';
+        return localStorage.getItem('rtspLink') || 'http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000';
     });
 
     const [inputSource, setInputSource] = useState(() => {
@@ -44,7 +44,7 @@ export const SettingsProvider = ({ children }) => {
     };
 
 
-    const [isCameraEnabled, setIsCameraEnabled] = useState(true);
+    const [isCameraEnabled, setIsCameraEnabled] = useState(false);
     const [switchSource, setSwitchSource] = useState(false);
     const inFlight = useRef(false);
 

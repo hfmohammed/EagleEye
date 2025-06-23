@@ -9,13 +9,16 @@ export default defineConfig({
     outDir: '../server/static',  // Output built files into Django static folder
     emptyOutDir: true,
   },
-  // server: {
-  //   proxy: {
-  //     "/api": {
-  //       target: "http://127.0.0.1:8000", // Django backend
-  //       changeOrigin: true,
-  //       secure: false, // False for HTTP backend
-  //     },
-  //   },
-  // }
+  server: {
+    host: '::', // Enables listening on IPv6
+    port: 5173,
+    allowedHosts: ['eagleeye.ddnsfree.com'],
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8000", // Django backend
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  }
 })
