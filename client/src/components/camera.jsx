@@ -12,7 +12,7 @@ const Camera = ({ onDataUpdate }) => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState(0);
     const [annotations, setAnnotations] = useState([]);
-    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLink, fps } = useContext(SettingsContext);
+    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps } = useContext(SettingsContext);
     // const s = "http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000";
     
 
@@ -100,7 +100,10 @@ const Camera = ({ onDataUpdate }) => {
                     }, 100);
                 });
     
-                socket.current.send(JSON.stringify({ action: 'BEGIN_STREAM', stream_url: `${rtspLink}` }));
+                socket.current.send(JSON.stringify({ 
+                    action: 'BEGIN_STREAM',
+                    stream_url: `${JSON.stringify(rtspLinks)}` 
+                }));
                 setIsStreaming(true);
     
                 cleanup = () => {
@@ -188,7 +191,7 @@ const Camera = ({ onDataUpdate }) => {
         return () => {
             if (cleanup) cleanup();
         };
-    }, [isCameraEnabled]);
+    }, [isCameraEnabled, rtspLinks]);
 
 
     const emitFrameToServer = useCallback(() => {
@@ -311,49 +314,52 @@ const Camera = ({ onDataUpdate }) => {
     return (
         <>
             <section className='camera flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1'>
-                <div>
-                    
-                    {isStreaming && !switchSource ? (
-                        <>
-                            {isCameraEnabled ? (
-                                <h1 className='text-center text-green-500'>Camera is streaming</h1>
-                                ) : (
-                                    <h1 className='text-center text-blue-500'>Live/Recorded streaming</h1>
-                                )
-                            }
+                {rtspLinks.map((rtspLinks, index) => (
+                    <div key={index} id={rtspLinks}>
+                        <div>
+                            
+                            {isStreaming && !switchSource ? (
+                                <>
+                                    {isCameraEnabled ? (
+                                        <h1 className='text-center text-green-500'>Camera is streaming</h1>
+                                        ) : (
+                                            <h1 className='text-center text-blue-500'>Live/Recorded streaming</h1>
+                                        )
+                                    }
 
-                            <h1 className='text-center text-red-500'>FPS set: {fps}</h1>
-                            <h2 className='text-center'>Detected Objects: {objectCount}</h2>
-                        </>
-                    ) : (
-                        <h1 className='text-center text-red-500'>Camera is not streaming</h1>
-                    )}
-                </div>
-                
-                {isCameraEnabled && !switchSource && (
-                    <div className='my-4 flex flex-col items-center'>
-                        <h3>Camera</h3>
-                        <video
-                            ref={videoRef}
-                            id='video'
-                            autoPlay
-                            className='rounded w-full'
-                            />
+                                    <h1 className='text-center text-red-500'>FPS set: {fps}</h1>
+                                    <h2 className='text-center'>Detected Objects: {objectCount}</h2>
+                                </>
+                            ) : (
+                                <h1 className='text-center text-red-500'>Camera is not streaming</h1>
+                            )}
+                        </div>
+                        
+                        {isCameraEnabled && !switchSource && (
+                            <div className='my-4 flex flex-col items-center hidden'>
+                                <h3>Camera</h3>
+                                <video
+                                    ref={videoRef}
+                                    id='video'
+                                    autoPlay
+                                    className='rounded w-full'
+                                    />
+                            </div>
+                        )}
+
+                        
+                        {!switchSource && (
+                            <div className='my-4 flex flex-col items-center hidden'>
+                                <h3>Input Frame</h3>
+                                <canvas 
+                                    ref={canvasInputRef} 
+                                    id='inputCanvas'
+                                    className='rounded w-full'
+                                    ></canvas>
+                            </div>
+                        )}
                     </div>
-                )}
-
-                
-                {!switchSource && (
-                    <div className='my-4 flex flex-col items-center hidden'>
-                        <h3>Input Frame</h3>
-                        <canvas 
-                            ref={canvasInputRef} 
-                            id='inputCanvas'
-                            className='rounded w-full'
-                            ></canvas>
-                    </div>
-                )}
-
+                ))}
                 {!switchSource && (
                     <div className='my-4 flex flex-col items-center'>
                         <h3>Output Frame</h3>
