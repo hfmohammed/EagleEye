@@ -1,5 +1,6 @@
 import './index.css'
 import Header from './components/header'
+import Settings from './components/settings'
 import Main from './components/main'
 import Footer from './components/footer'
 import React, { useContext } from 'react'
@@ -12,6 +13,7 @@ function App() {
     <>
     <SettingsProvider>
       <Header />
+      <Settings />
 
       <DataProvider>
         <Main />

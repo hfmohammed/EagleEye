@@ -47,7 +47,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
     streaming_task = None
     stream_active = False
 
-    async def stream_frames(stream_url):
+    async def stream_frames(stream_url, index):
         nonlocal stream_active
         cap = cv2.VideoCapture(stream_url)
         if not cap.isOpened():
@@ -104,7 +104,8 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     "annotations": annotations,
                     "category_counts": category_counts,
                     "timestamp": timestamp,
-                    "fps": fps
+                    "fps": fps,
+                    "index": index
                 }))
                 updateDatabase(category_counts, count, fps, timestamp)
 
@@ -124,12 +125,15 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
             print("Received message:", message)
 
             if message.get("action") == "BEGIN_STREAM":
-                stream_url = message.get("stream_url")
-                if not stream_active:
-                    stream_active = True
-                    streaming_task = asyncio.create_task(stream_frames(stream_url))
+                stream_url = json.loads(message.get("stream_url"))
+                for rtsp_index in range(len(stream_url)):
+                    print(stream_url)
 
-            elif message.get("action") == "stop_stream":
+                    if not stream_active:
+                        stream_active = True
+                        streaming_task = asyncio.create_task(stream_frames(stream_url[rtsp_index], rtsp_index))
+
+            elif message.get("action") == "STOP_STREAM":
                 if stream_active:
                     stream_active = False
                     if streaming_task:

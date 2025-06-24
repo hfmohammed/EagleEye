@@ -7,8 +7,8 @@ export const SettingsProvider = ({ children }) => {
         return saved ? parseInt(saved) : 2;
     });
 
-    const [rtspLink, setRtspLink] = useState(() => {
-        return localStorage.getItem('rtspLink') || 'http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000';
+    const [rtspLinks, setRtspLinks] = useState(() => {
+        return JSON.parse(localStorage.getItem('rtspLinks')) || ['http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000'];
     });
 
     const [inputSource, setInputSource] = useState(() => {
@@ -16,45 +16,67 @@ export const SettingsProvider = ({ children }) => {
         return savedSource || 'webcam'; // Default to 'webcam' if no source
     });
 
-    const saveSettings = (newFps, newRtspLink, newInputSource) => {
-        if (newInputSource !== inputSource) {
-            toggleCamera(); // Toggle camera if input source changes
-        }
-        if (newInputSource === "webcam") localStorage.setItem('rtspLink', '')
-        
-        console.log('Saving settings:', { newFps, newRtspLink, newInputSource });
+    const saveSettings = (newFps, newRtspLinks, newInputSource) => {
+        const errors = [];
+        console.log('Saving settings:', { newFps, newRtspLinks, newInputSource });
         
         // Validate and save FPS
         const parsedFps = parseInt(newFps);
-        if (!isNaN(parsedFps) && parsedFps > 0) {
+        if (!isNaN(parsedFps) && parsedFps > 0 && errors.length === 0) {
             console.log('Setting FPS to:', parsedFps);
             setFps(parsedFps);
             localStorage.setItem('fps', parsedFps.toString());
+        } else {
+            console.log(errors)
+            console.log('Invalid FPS:', parsedFps);
+            errors.push(isNaN(parsedFps) ? 'FPS must be set' : 'Invalid FPS');
         }
 
         // Save RTSP link
-        setRtspLink(newRtspLink || '');
-        localStorage.setItem('rtspLink', newRtspLink || '');
+        newRtspLinks = newRtspLinks.filter(link => link.trim())
+        if (newRtspLinks.length !== 0 && errors.length === 0) {
+            setRtspLinks(newRtspLinks || []);
+            console.log('Saving RTSP links:', JSON.stringify(newRtspLinks));
+            localStorage.setItem('rtspLinks', JSON.stringify(newRtspLinks) || []);
+        } else {
+            if (newRtspLinks.length === 0) {
+                console.log('No RTSP links set');
+                errors.push('At least one RTSP link must be set');
+            }
+        }
 
         // Save input source
-        if (newInputSource) {
+        if (newInputSource && errors.length === 0) {
             setInputSource(newInputSource);
             localStorage.setItem('inputSource', newInputSource);
+        } else {
+            if (!newInputSource) {
+                console.log('Invalid input source:', newInputSource);
+                errors.push('Invalid input source');
+            }
         }
+
+        if (newInputSource !== inputSource && errors.length === 0) {
+            toggleCamera(newInputSource); // Toggle camera if input source changes
+        }
+        // if (newInputSource === "webcam") localStorage.setItem('rtspLinks', JSON.stringify([]));
+
+        return errors;
     };
 
 
     const [isCameraEnabled, setIsCameraEnabled] = useState(false);
     const [switchSource, setSwitchSource] = useState(false);
     const inFlight = useRef(false);
+    const [ settingsOpen, setSettingsOpen ] = useState(false);
 
-    const toggleCamera = () => {
-        setIsCameraEnabled(prev => !prev);
+    const toggleCamera = (newInputSource) => {
+        setIsCameraEnabled(newInputSource === "webcam");
         inFlight.current = false;
     };
 
     return (
-        <SettingsContext.Provider value={{ isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLink, setRtspLink, inputSource, setInputSource }}>
+        <SettingsContext.Provider value={{ isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLinks, setRtspLinks, inputSource, setInputSource, settingsOpen, setSettingsOpen }}>
             {children}
         </SettingsContext.Provider>
     );
