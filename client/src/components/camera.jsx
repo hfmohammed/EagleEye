@@ -24,6 +24,7 @@ const Camera = ({ onDataUpdate }) => {
             if (!isCameraEnabled) {
                 console.log(import.meta.env.VITE_WEBSOCKET_URL);
                 socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_RTSP_URL);
+                let lastDrawTime = 0;
 
                 socket.current.onopen = () => {
                     setSwitchSource(false);
@@ -45,6 +46,15 @@ const Camera = ({ onDataUpdate }) => {
                 }
 
                 socket.current.onmessage = (event) => {
+                    const now = Date.now();
+                    // if (now - lastDrawTime < 1000 / fps) {
+                    //     console.log("ignoring", now - lastDrawTime)
+                    //     return;
+                    // }
+
+                    console.log("success")
+                    lastDrawTime = now;
+
                     inFlight.current = false;
                     const message = JSON.parse(event.data);
                     console.log("RTSP message received:", message);
@@ -104,7 +114,8 @@ const Camera = ({ onDataUpdate }) => {
 
                 socket.current.send(JSON.stringify({ 
                     action: 'BEGIN_STREAM',
-                    stream_url: `${JSON.stringify(rtspLinks)}` 
+                    stream_url: `${JSON.stringify(rtspLinks)}`,
+                    fps: fps
                 }));
                 setIsStreaming(true);
 
@@ -217,7 +228,7 @@ const Camera = ({ onDataUpdate }) => {
                     console.error("Error capturing frame:", error);
                 });
         }
-    }, [fps]);
+    }, []);
 
     useEffect(() => {
         if (!isCameraEnabled) {

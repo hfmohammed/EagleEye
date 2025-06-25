@@ -47,7 +47,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
     streaming_task = None
     stream_active = False
 
-    async def stream_frames(stream_url, index):
+    async def stream_frames(stream_url, index, desired_fps):
         nonlocal stream_active
         cap = cv2.VideoCapture(stream_url)
         if not cap.isOpened():
@@ -58,6 +58,8 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
         print("Streaming loop started")
 
         while stream_active:
+            start_time = time.time()
+            
             ret, frame = cap.read()
             if not ret:
                 await ws.send_text(json.dumps({"error": "Failed to read frame"}))
@@ -110,7 +112,8 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                 }))
                 updateDatabase(category_counts, count, fps, timestamp)
 
-                await asyncio.sleep(0.1)
+                elapsed = time.time() - start_time
+                await asyncio.sleep(max(0, (1 / desired_fps) - elapsed))
 
             except Exception as e:
                 await ws.send_text(json.dumps({"error": f"YOLO error: {str(e)}"}))
@@ -126,6 +129,9 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
             print("Received message:", message)
 
             if message.get("action") == "BEGIN_STREAM":
+                desired_fps = message.get("fps", 10)
+                frame_interval = 1 / desired_fps
+
                 stream_url_list = json.loads(message.get("stream_url"))
                 print(stream_url_list)
 
@@ -133,7 +139,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     stream_active = True
                     # Start a streaming task for each RTSP URL
                     streaming_task = [
-                        asyncio.create_task(stream_frames(url, idx))
+                        asyncio.create_task(stream_frames(url, idx, desired_fps))
                         for idx, url in enumerate(stream_url_list)
                     ]
 
