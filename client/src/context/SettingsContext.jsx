@@ -25,9 +25,9 @@ export const SettingsProvider = ({ children }) => {
         
         // Validate and save FPS
         const parsedFps = parseInt(newFps);
-        if (!isNaN(parsedFps) && parsedFps > 0 && errors.length === 0) {
+        if (errors.length === 0 && !isNaN(parsedFps) && parsedFps > 0) {
             console.log('Setting FPS to:', parsedFps);
-            setFps(parsedFps);
+            setFps(Number(newFps));
             localStorage.setItem('fps', parsedFps.toString());
         } else {
             console.log(errors)

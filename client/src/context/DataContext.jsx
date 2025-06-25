@@ -7,6 +7,7 @@ export const DataProvider = ({ children }) => {
   const [cameraData, setCameraData] = useState({});
 
   const updateData = (cameraId, newData) => {
+    console.log("updatingdata")
     const currentTime = Date.now();
   
     setCameraData((prev) => {

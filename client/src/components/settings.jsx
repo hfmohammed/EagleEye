@@ -45,6 +45,7 @@ const Settings = () => {
       setErrors(newErrors);
       console.log(newErrors);
     } else {
+      setErrors([]);
       console.log("success");
       setSettingsOpen(false);
     }
