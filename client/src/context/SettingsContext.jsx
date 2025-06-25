@@ -2,6 +2,8 @@ import React, { createContext, useState, useRef } from 'react';
 export const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
+      const [selectedTab, setSelectedTab] = useState('camera 0');
+    
     const [fps, setFps] = useState(() => {
         const saved = localStorage.getItem('fps');
         return saved ? parseInt(saved) : 2;
@@ -17,6 +19,7 @@ export const SettingsProvider = ({ children }) => {
     });
 
     const saveSettings = (newFps, newRtspLinks, newInputSource) => {
+        setSelectedTab('camera 0')
         const errors = [];
         console.log('Saving settings:', { newFps, newRtspLinks, newInputSource });
         
@@ -31,17 +34,19 @@ export const SettingsProvider = ({ children }) => {
             console.log('Invalid FPS:', parsedFps);
             errors.push(isNaN(parsedFps) ? 'FPS must be set' : 'Invalid FPS');
         }
-
-        // Save RTSP link
-        newRtspLinks = newRtspLinks.filter(link => link.trim())
-        if (newRtspLinks.length !== 0 && errors.length === 0) {
-            setRtspLinks(newRtspLinks || []);
-            console.log('Saving RTSP links:', JSON.stringify(newRtspLinks));
-            localStorage.setItem('rtspLinks', JSON.stringify(newRtspLinks) || []);
-        } else {
-            if (newRtspLinks.length === 0) {
-                console.log('No RTSP links set');
-                errors.push('At least one RTSP link must be set');
+        
+        if (newInputSource === "rtsp") {
+            // Save RTSP link
+            newRtspLinks = newRtspLinks.filter(link => link.trim())
+            if (newRtspLinks.length !== 0 && errors.length === 0) {
+                setRtspLinks(newRtspLinks || []);
+                console.log('Saving RTSP links:', JSON.stringify(newRtspLinks));
+                localStorage.setItem('rtspLinks', JSON.stringify(newRtspLinks) || []);
+            } else {
+                if (newRtspLinks.length === 0) {
+                    console.log('No RTSP links set');
+                    errors.push('At least one RTSP link must be set');
+                }
             }
         }
 
@@ -65,7 +70,7 @@ export const SettingsProvider = ({ children }) => {
     };
 
 
-    const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+    const [isCameraEnabled, setIsCameraEnabled] = useState(inputSource === "webcam");
     const [switchSource, setSwitchSource] = useState(false);
     const inFlight = useRef(false);
     const [ settingsOpen, setSettingsOpen ] = useState(false);
@@ -76,7 +81,7 @@ export const SettingsProvider = ({ children }) => {
     };
 
     return (
-        <SettingsContext.Provider value={{ isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLinks, setRtspLinks, inputSource, setInputSource, settingsOpen, setSettingsOpen }}>
+        <SettingsContext.Provider value={{ isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLinks, setRtspLinks, inputSource, setInputSource, settingsOpen, setSettingsOpen, selectedTab, setSelectedTab }}>
             {children}
         </SettingsContext.Provider>
     );

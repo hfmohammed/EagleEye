@@ -1,74 +1,78 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { DataContext } from '../context/DataContext';
 import Camera from './camera';
 import PieChartCard from './PieChartCard';
 import LineChartCard from './LineChartCard';
 import DetectionTable from './DetectionTable';
-import { DataContext } from '../context/DataContext';
 import { SettingsContext } from '../context/SettingsContext';
-
-// main.jsx or App.jsx
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-  TimeScale,
-  Title,
-} from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-  TimeScale,
-  Title
-);
 
 
 function Main() {
-  const { data, updateData } = useContext(DataContext);
-  const { _isCameraEnabled } = useContext(SettingsContext);
+  const { cameraData, updateData } = useContext(DataContext);
+  const {selectedTab, setSelectedTab} = useContext(SettingsContext);
+  const [cameraIds, setCameraIds] = useState([]);
+
+  useEffect(() => {
+    console.log("djfkjlfj", Object.keys(cameraData));
+    setCameraIds(Object.keys(cameraData))
+  }, [cameraData])
+  
+  const activeData = cameraData[selectedTab] || {
+    fpsData: [],
+    tableData: [],
+    category_counts: {},
+  };
 
   const pieChartData = {
-    labels: Object.keys(data.category_counts || {}),
+    labels: Object.keys(activeData.category_counts || {}),
     datasets: [{
-      data: Object.values(data.category_counts || {}),
+      data: Object.values(activeData.category_counts || {}),
       backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
     }],
   };
 
   const lineChartData = {
-    labels: data.fpsData.map((entry) => new Date(entry.time).toLocaleTimeString()),
+    labels: activeData.fpsData.map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [{
       label: 'FPS Over Time',
-      data: data.fpsData.map((entry) => entry.fps),
+      data: activeData.fpsData.map((entry) => entry.fps),
       borderColor: '#36A2EB',
       fill: false,
     }],
   };
 
   return (
-    <main className='min-h-screen bg-gray-100 p-6 overflow-hidden'>
-      <div className='flex flex-row gap-6'>
+    <main className="min-h-screen bg-gray-100 p-4 md:p-6 transition-all">
+      <div className="mb-4 flex space-x-4">
+        {cameraIds.map((id) => (
+          <button
+            key={id}
+            onClick={() => setSelectedTab(id)}
+            className={`px-4 py-2 rounded ${selectedTab === id ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            {id}
+          </button>
+        ))}
+      </div>
 
-        {/* {isCameraEnabled && ( */}
-          <Camera onDataUpdate={updateData} />
-        {/* )} */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="w-full lg:w-1/2 flex">
+          <Camera
+            onDataUpdate={(data) => {
+              const camId = data.camera_id ?? `camera ${data.index}`;
+              console.log("Updating data for camera:", camId, data);
+              updateData(camId, data);
+            }}
+          />
+        </div>
 
-        <div className='flex flex-col gap-6 flex-1 max-h-screen overflow-hidden'>
+        <div className="w-full lg:w-1/2 flex flex-col gap-6">
           <PieChartCard data={pieChartData} />
           <LineChartCard data={lineChartData} />
         </div>
       </div>
-      <DetectionTable rows={data.tableData} />
+
+      <DetectionTable rows={activeData.tableData} />
     </main>
   );
 }

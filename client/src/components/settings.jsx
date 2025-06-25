@@ -36,6 +36,7 @@ const Settings = () => {
       null;
       // setEditedRtspLinks([]); // Clear RTSP link if webcam is selected
     }
+
     console.log('Saving settings:', { editedFps, editedRtspLinks, selectedSource });
     const newErrors = saveSettings(editedFps, editedRtspLinks, selectedSource);
     console.log("NEW ERRORS", newErrors);

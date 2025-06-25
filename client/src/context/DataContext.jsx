@@ -1,32 +1,39 @@
-// context/DataContext.jsx
+// Updated context/DataContext.jsx to support multiple camera tabs
 import React, { createContext, useState } from 'react';
 
 export const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-  const [data, setData] = useState({
-    fpsData: [],
-    tableData: [],
-    category_counts: {},
-  });
+  const [cameraData, setCameraData] = useState({});
 
-  const updateData = (newData) => {
-    const currentTime = new Date().getTime();
-
-    setData((prevData) => ({
-      ...prevData,
-      fpsData: [...prevData.fpsData, { time: currentTime, fps: newData.fps }].filter(
-        (entry) => currentTime - entry.time <= 60000
-      ),
-      tableData: [...prevData.tableData, { timestamp: newData.timestamp, count: newData.count }].filter(
-        (entry) => currentTime - new Date(entry.timestamp).getTime() <= 60000
-      ),
-      category_counts: newData.category_counts,
-    }));
+  const updateData = (cameraId, newData) => {
+    const currentTime = Date.now();
+  
+    setCameraData((prev) => {
+      console.log("jfajfkakjf", prev)
+      const prevCam = prev[cameraId] || {
+        fpsData: [],
+        tableData: [],
+        category_counts: {},
+      };
+  
+      return {
+        ...prev,
+        [cameraId]: {
+          fpsData: [...prevCam.fpsData, { time: currentTime, fps: newData.fps }].filter(
+            (e) => currentTime - e.time <= 60000
+          ),
+          tableData: [...prevCam.tableData, { timestamp: newData.timestamp, count: newData.count }].filter(
+            (e) => currentTime - new Date(e.timestamp).getTime() <= 60000
+          ),
+          category_counts: newData.category_counts,
+        },
+      };
+    });
   };
-
+  
   return (
-    <DataContext.Provider value={{ data, updateData }}>
+    <DataContext.Provider value={{ cameraData, setCameraData, updateData }}>
       {children}
     </DataContext.Provider>
   );

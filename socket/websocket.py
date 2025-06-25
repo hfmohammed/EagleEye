@@ -105,7 +105,8 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     "category_counts": category_counts,
                     "timestamp": timestamp,
                     "fps": fps,
-                    "index": index
+                    "index": index,
+                    "camera_id": f"camera {index}"
                 }))
                 updateDatabase(category_counts, count, fps, timestamp)
 
@@ -125,26 +126,29 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
             print("Received message:", message)
 
             if message.get("action") == "BEGIN_STREAM":
-                stream_url = json.loads(message.get("stream_url"))
-                for rtsp_index in range(len(stream_url)):
-                    print(stream_url)
+                stream_url_list = json.loads(message.get("stream_url"))
+                print(stream_url_list)
 
-                    if not stream_active:
-                        stream_active = True
-                        streaming_task = asyncio.create_task(stream_frames(stream_url[rtsp_index], rtsp_index))
+                if not stream_active:
+                    stream_active = True
+                    # Start a streaming task for each RTSP URL
+                    streaming_task = [
+                        asyncio.create_task(stream_frames(url, idx))
+                        for idx, url in enumerate(stream_url_list)
+                    ]
 
             elif message.get("action") == "STOP_STREAM":
                 if stream_active:
                     stream_active = False
                     if streaming_task:
-                        await streaming_task  # wait for task to finish
+                        await asyncio.gather(*streaming_task)  # wait for task to finish
                         streaming_task = None
 
     except WebSocketDisconnect:
         print("RTSP WebSocket disconnected")
         stream_active = False
         if streaming_task:
-            await streaming_task
+            await asyncio.gather(*streaming_task)
 
 
 
@@ -227,7 +231,9 @@ async def websocket_endpoint(ws: WebSocket):
                 "annotations": annotations,
                 "category_counts": category_counts,
                 "timestamp": timestamp,
-                "fps": fps
+                "fps": fps,
+                "index": 0,
+                "camera_id": f"camera {0}"
             }))
             updateDatabase(category_counts, count, fps, timestamp)
 

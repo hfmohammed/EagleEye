@@ -13,9 +13,9 @@ function App() {
     <>
     <SettingsProvider>
       <Header />
-      <Settings />
 
       <DataProvider>
+        <Settings />
         <Main />
       </DataProvider>
 
