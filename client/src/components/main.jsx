@@ -9,7 +9,7 @@ import { SettingsContext } from '../context/SettingsContext';
 
 function Main() {
   const { cameraData, updateData } = useContext(DataContext);
-  const {selectedTab, setSelectedTab} = useContext(SettingsContext);
+  const {selectedTab, setSelectedTab, enableAnnotationsRef } = useContext(SettingsContext);
   const [cameraIds, setCameraIds] = useState([]);
 
   useEffect(() => {
@@ -43,16 +43,30 @@ function Main() {
 
   return (
     <main className="min-h-screen bg-gray-100 p-4 md:p-6 transition-all">
-      <div className="mb-4 flex space-x-4">
-        {cameraIds.map((id) => (
+      <div className='flex justify-between'>
+        <div className="mb-4 flex space-x-4 camera-data-controls">
+          {cameraIds.map((id) => (
+            <button
+              key={id}
+              onClick={() => setSelectedTab(id)}
+              className={`px-4 py-2 rounded hover:cursor-pointer hover:opacity-80 transition ${selectedTab === id ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            >
+              {id}
+            </button>
+          ))}
+        </div>
+
+        <div className=''>
           <button
-            key={id}
-            onClick={() => setSelectedTab(id)}
-            className={`px-4 py-2 rounded ${selectedTab === id ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            className={`px-4 py-2 rounded hover:cursor-pointer hover:opacity-80 transition ${enableAnnotationsRef.current ? 'bg-purple-500' : 'bg-gray-500'} text-white`}
+            onClick={() => {
+              enableAnnotationsRef.current = !(enableAnnotationsRef.current);
+              localStorage.setItem('enableAnnotationsRef', JSON.stringify(enableAnnotationsRef.current))
+            }}
           >
-            {id}
+            Annotate
           </button>
-        ))}
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

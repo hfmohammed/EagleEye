@@ -1,9 +1,16 @@
-import React, { createContext, useState, useRef } from 'react';
+import React, { createContext, useState, useRef, useEffect } from 'react';
 export const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
-      const [selectedTab, setSelectedTab] = useState('camera 0');
-    
+    const [selectedTab, setSelectedTab] = useState('camera 0');
+    const enableAnnotationsRef = useRef(() => {
+        const stored = localStorage.getItem('enableAnnotationsRef');
+        if (stored === null) {
+            localStorage.setItem('enableAnnotationsRef', JSON.stringify(true));
+        }
+        return stored !== null ? JSON.parse(stored) : true;
+      });
+      
     const [fps, setFps] = useState(() => {
         const saved = localStorage.getItem('fps');
         return saved ? parseInt(saved) : 2;
@@ -81,7 +88,7 @@ export const SettingsProvider = ({ children }) => {
     };
 
     return (
-        <SettingsContext.Provider value={{ isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLinks, setRtspLinks, inputSource, setInputSource, settingsOpen, setSettingsOpen, selectedTab, setSelectedTab }}>
+        <SettingsContext.Provider value={{ isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLinks, setRtspLinks, inputSource, setInputSource, settingsOpen, setSettingsOpen, selectedTab, setSelectedTab, enableAnnotationsRef }}>
             {children}
         </SettingsContext.Provider>
     );

@@ -85,9 +85,9 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     })
                     category_counts[label] = category_counts.get(label, 0) + 1
 
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                    cv2.putText(frame, f"{label} {conf:.2f}", (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    # cv2.putText(frame, f"{label} {conf:.2f}", (x1, y1 - 10),
+                    #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
                 current_time = time.time()
                 frame_times.append(current_time)
@@ -197,9 +197,9 @@ async def websocket_endpoint(ws: WebSocket):
 
                 category_counts[label] = category_counts.get(label, 0) + 1
 
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                cv2.putText(img, f"{label} {conf:.2f}", (x1, y1-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                # cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                # cv2.putText(img, f"{label} {conf:.2f}", (x1, y1-10),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             # encode annotated image without resizing
             _, buf = cv2.imencode(".jpeg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])
