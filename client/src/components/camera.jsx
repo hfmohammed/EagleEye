@@ -2,6 +2,24 @@ import React, { useState, useEffect, useRef, useCallback, useContext } from 'rea
 import { SettingsContext } from '../context/SettingsContext';
 import { DataContext } from '../context/DataContext';
 
+const drawAnnotations = (ctx, annotations, scaleX, scaleY) => {
+    if (!ctx || !annotations) return;
+    annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
+        const scaledX1 = x1 * scaleX;
+        const scaledY1 = y1 * scaleY;
+        const scaledX2 = x2 * scaleX;
+        const scaledY2 = y2 * scaleY;
+
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(scaledX1, scaledY1, scaledX2 - scaledX1, scaledY2 - scaledY1);
+
+        ctx.fillStyle = 'green';
+        ctx.font = '12px Arial';
+        ctx.fillText(`${label} (${confidence.toFixed(2)})`, scaledX1, scaledY1 - 5);
+    });
+};
+
 const Camera = ({ onDataUpdate }) => {
     const videoRef = useRef(null);
     const canvasOutputRef = useRef({});
@@ -13,7 +31,7 @@ const Camera = ({ onDataUpdate }) => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState([]);
     const [annotations, setAnnotations] = useState({});
-    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps } = useContext(SettingsContext);
+    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps, enableAnnotationsRef } = useContext(SettingsContext);
     const { setCameraData } = useContext(DataContext)
     // http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000
 
@@ -77,15 +95,12 @@ const Camera = ({ onDataUpdate }) => {
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
 
-                        message.annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 2;
-                            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-
-                            ctx.fillStyle = 'green';
-                            ctx.font = '12px Arial';
-                            ctx.fillText(`${label} (${confidence.toFixed(2)})`, x1, y1 - 5);
-                        });
+                        const scaleX = outputCanvas.width / image.width;
+                        const scaleY = outputCanvas.height / image.height;
+                        
+                        if (enableAnnotationsRef.current) {
+                            drawAnnotations(ctx, message.annotations, scaleX, scaleY);
+                        }
                     };
 
                     setObjectCount(prev => {
@@ -174,15 +189,9 @@ const Camera = ({ onDataUpdate }) => {
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
 
-                        message.annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 2;
-                            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-
-                            ctx.fillStyle = 'green';
-                            ctx.font = '12px Arial';
-                            ctx.fillText(`${label} (${confidence.toFixed(2)})`, x1, y1 - 5);
-                        });
+                        if (enableAnnotationsRef.current) {
+                            drawAnnotations(ctx, message.annotations, scaleX, scaleY);
+                        }
                     };
 
                     setObjectCount([message.count]);
