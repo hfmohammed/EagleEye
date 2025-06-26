@@ -13,7 +13,7 @@ const Camera = ({ onDataUpdate }) => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState([]);
     const [annotations, setAnnotations] = useState({});
-    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps } = useContext(SettingsContext);
+    const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps, enableAnnotations } = useContext(SettingsContext);
     const { setCameraData } = useContext(DataContext)
     // http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000
 
@@ -76,16 +76,18 @@ const Camera = ({ onDataUpdate }) => {
 
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
+                        
+                        // if (enableAnnotations) {
+                            message.annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
+                                ctx.strokeStyle = 'red';
+                                ctx.lineWidth = 2;
+                                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-                        message.annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 2;
-                            ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-
-                            ctx.fillStyle = 'green';
-                            ctx.font = '12px Arial';
-                            ctx.fillText(`${label} (${confidence.toFixed(2)})`, x1, y1 - 5);
-                        });
+                                ctx.fillStyle = 'green';
+                                ctx.font = '12px Arial';
+                                ctx.fillText(`${label} (${confidence.toFixed(2)})`, x1, y1 - 5);
+                            });
+                        // }
                     };
 
                     setObjectCount(prev => {
