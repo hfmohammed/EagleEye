@@ -23,8 +23,8 @@ supabase_key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(supabase_url, supabase_key)
 
 
-def updateDatabase(category_counts, total_item_count, fps, timestamp):
-    print(category_counts, total_item_count, fps, timestamp)
+def updateDatabase(category_counts, total_item_count, fps, timestamp, index):
+    print(category_counts, total_item_count, fps, timestamp, index)
     if fps is None:
         fps = 0
 
@@ -33,6 +33,7 @@ def updateDatabase(category_counts, total_item_count, fps, timestamp):
         "objects": category_counts,
         "total_items": total_item_count,
         "fps": fps,
+        "index": index,
     }
     response = supabase.table("EagleEye_traffic_data").insert(data).execute()
     print("Database update response:", response)
@@ -110,7 +111,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     "index": index,
                     "camera_id": f"camera {index}"
                 }))
-                updateDatabase(category_counts, count, fps, timestamp)
+                updateDatabase(category_counts, count, fps, timestamp, index)
 
                 elapsed = time.time() - start_time
                 await asyncio.sleep(max(0, (1 / desired_fps) - elapsed))
@@ -241,7 +242,7 @@ async def websocket_endpoint(ws: WebSocket):
                 "index": 0,
                 "camera_id": f"camera {0}"
             }))
-            updateDatabase(category_counts, count, fps, timestamp)
+            updateDatabase(category_counts, count, fps, timestamp, 0)
 
     except WebSocketDisconnect:
         print("Client disconnected")
