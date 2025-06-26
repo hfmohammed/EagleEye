@@ -10,12 +10,12 @@ export const SettingsProvider = ({ children }) => {
     });
 
     const [rtspLinks, setRtspLinks] = useState(() => {
-        return JSON.parse(localStorage.getItem('rtspLinks')) || ['http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000'];
+        return JSON.parse(localStorage.getItem('rtspLinks')) || ['http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000', 'resources/cars.mp4', 'resources/people.mp4'];
     });
 
     const [inputSource, setInputSource] = useState(() => {
         const savedSource = localStorage.getItem('inputSource');
-        return savedSource || 'webcam'; // Default to 'webcam' if no source
+        return savedSource || 'rtsp'; // Default to 'rtsp' if no source
     });
 
     const saveSettings = (newFps, newRtspLinks, newInputSource) => {
