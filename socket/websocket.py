@@ -68,7 +68,10 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
             # === Apply YOLO or your processing ===
             try:
+                print("starting to analyze")
                 results = model(frame, conf=0.2)
+                print("ending to analyze")
+
                 boxes = results[0].boxes
                 count = len(boxes)
                 annotations = []
@@ -100,6 +103,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
                 jpeg_b64 = base64.b64encode(buf.tobytes()).decode("utf-8")
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
+                print("sending message")
 
                 await ws.send_text(json.dumps({
                     "image": jpeg_b64,
@@ -140,7 +144,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     stream_active = True
                     # Start a streaming task for each RTSP URL
                     streaming_task = [
-                        asyncio.create_task(stream_frames(url, idx, desired_fps))
+                        asyncio.create_task(stream_frames(url, idx, frame_interval))
                         for idx, url in enumerate(stream_url_list)
                     ]
 
