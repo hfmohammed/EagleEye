@@ -48,7 +48,10 @@ function Main() {
           {cameraIds.map((id) => (
             <button
               key={id}
-              onClick={() => setSelectedTab(id)}
+              onClick={() => {
+                setSelectedTab(id);
+                localStorage.setItem('selectedTab', `${id}`);
+              }}
               className={`px-4 py-2 rounded hover:cursor-pointer hover:opacity-80 transition ${selectedTab === id ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             >
               {id}

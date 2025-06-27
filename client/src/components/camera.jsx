@@ -189,6 +189,9 @@ const Camera = ({ onDataUpdate }) => {
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
 
+                        const scaleX = outputCanvas.width / image.width;
+                        const scaleY = outputCanvas.height / image.height;
+
                         if (enableAnnotationsRef.current) {
                             drawAnnotations(ctx, message.annotations, scaleX, scaleY);
                         }
