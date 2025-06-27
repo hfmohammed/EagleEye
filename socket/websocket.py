@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 
 
 app = FastAPI()
-model = YOLO("yolov8n.pt")
+model = YOLO("model_- 1 april 2024 14_16.pt")
 
 load_dotenv()
 supabase_url = os.getenv("SUPABASE_URL")
@@ -48,7 +48,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
     streaming_task = None
     stream_active = False
 
-    async def stream_frames(stream_url, index, desired_fps):
+    async def stream_frames(stream_url, index, desired_fps, stream_url_count):
         nonlocal stream_active
         cap = cv2.VideoCapture(stream_url)
         if not cap.isOpened():
@@ -60,6 +60,10 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
         while stream_active:
             start_time = time.time()
+
+            for _ in range(int(30 * stream_url_count / desired_fps)):  # discard old frames
+                cap.grab()
+
             
             ret, frame = cap.read()
             if not ret:
@@ -140,7 +144,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     stream_active = True
                     # Start a streaming task for each RTSP URL
                     streaming_task = [
-                        asyncio.create_task(stream_frames(url, idx, desired_fps))
+                        asyncio.create_task(stream_frames(url, idx, desired_fps, len(stream_url_list)))
                         for idx, url in enumerate(stream_url_list)
                     ]
 
