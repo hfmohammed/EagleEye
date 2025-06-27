@@ -2,31 +2,61 @@ import React, { createContext, useState, useRef, useEffect } from 'react';
 export const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
-    const [selectedTab, setSelectedTab] = useState('camera 0');
-    const enableAnnotationsRef = useRef(() => {
-        const stored = localStorage.getItem('enableAnnotationsRef');
-        if (stored === null) {
-            localStorage.setItem('enableAnnotationsRef', JSON.stringify(true));
+    const [ settingsOpen, setSettingsOpen ] = useState(() => {
+        const saved = localStorage.getItem('settingsOpen');
+        if (saved === null) {
+            localStorage.setItem('settingsOpen', JSON.stringify(false))
         }
-        return stored !== null ? JSON.parse(stored) : true;
-      });
-      
+        return JSON.parse(localStorage.getItem('settingsOpen'));
+    });
+
+    const [selectedTab, setSelectedTab] = useState(() => {
+        const saved = localStorage.getItem('selectedTab');
+        if (saved === null) {
+            localStorage.setItem('selectedTab', 'camera 0');
+        }
+        return localStorage.getItem('selectedTab');
+    });
+
+    const enableAnnotationsRef = useRef(
+        JSON.parse(localStorage.getItem('enableAnnotationsRef')) ?? true
+    );
+
+    // Persist the value on first load
+    useEffect(() => {
+        if (localStorage.getItem('enableAnnotationsRef') === null) {
+            localStorage.setItem('enableAnnotationsRef', JSON.stringify(enableAnnotationsRef.current));
+        }
+    }, []);
+  
+            
     const [fps, setFps] = useState(() => {
         const saved = localStorage.getItem('fps');
-        return saved ? parseInt(saved) : 2;
+        if (saved === null) {
+            localStorage.setItem('fps', JSON.stringify(2));
+        }
+        return JSON.parse(localStorage.getItem('fps'));
     });
 
     const [rtspLinks, setRtspLinks] = useState(() => {
-        return JSON.parse(localStorage.getItem('rtspLinks')) || ['http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000', 'resources/cars.mp4', 'resources/people.mp4'];
+        const saved = localStorage.getItem('rtspLinks')
+        if (saved === null) {
+            localStorage.setItem('rtspLinks', JSON.stringify(['http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000', 'resources/construction.mp4', 'resources/people.mp4']))
+        }
+        return JSON.parse(localStorage.getItem('rtspLinks'));
     });
 
     const [inputSource, setInputSource] = useState(() => {
         const savedSource = localStorage.getItem('inputSource');
-        return savedSource || 'rtsp'; // Default to 'rtsp' if no source
+        if (savedSource === null) {
+            localStorage.setItem('inputSource', "rtsp")
+        }
+        return localStorage.getItem('inputSource');
     });
 
     const saveSettings = (newFps, newRtspLinks, newInputSource) => {
-        setSelectedTab('camera 0')
+        setSelectedTab('camera 0');
+        localStorage.setItem('selectedTab', 'camera 0');
         const errors = [];
         console.log('Saving settings:', { newFps, newRtspLinks, newInputSource });
         
@@ -80,7 +110,6 @@ export const SettingsProvider = ({ children }) => {
     const [isCameraEnabled, setIsCameraEnabled] = useState(inputSource === "webcam");
     const [switchSource, setSwitchSource] = useState(false);
     const inFlight = useRef(false);
-    const [ settingsOpen, setSettingsOpen ] = useState(false);
 
     const toggleCamera = (newInputSource) => {
         setIsCameraEnabled(newInputSource === "webcam");
