@@ -9,4 +9,4 @@ yolov8n.pt
 socket/yolov8n.pt
 client/.env
 socket/.env
-*/*/construction.mp4
+socket/resources/construction.mp4
