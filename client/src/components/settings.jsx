@@ -48,6 +48,7 @@ const Settings = () => {
       setErrors([]);
       console.log("success");
       setSettingsOpen(false);
+      localStorage.setItem('settingsOpen', JSON.stringify(false));
     }
   }
 
@@ -71,7 +72,12 @@ const Settings = () => {
                 Settings
               </h1>
 
-              <button className="rounded-lg cursor-pointer bg-white px-4 py-2" onClick={() => setSettingsOpen(false)}>x</button>
+              <button className="rounded-lg cursor-pointer bg-white px-4 py-2" onClick={() => {
+                setSettingsOpen(false);
+                localStorage.setItem('settingsOpen', JSON.stringify(false));
+              }}>
+                x
+              </button>
             </div>
 
             <div className="flex flex-col space-y-4 my-4">

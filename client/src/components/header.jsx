@@ -13,7 +13,10 @@ const Header = () => {
 
             <section className="flex items-center space-x-4">
                 {/* Settings Button */}
-                <button className='bg-gray-300 text-white rounded-full cursor-pointer px-3 py-2 hover:bg-gray-400' onClick={() => setSettingsOpen(!settingsOpen)}>
+                <button className='bg-gray-300 text-white rounded-full cursor-pointer px-3 py-2 hover:bg-gray-400' onClick={() => {
+                    setSettingsOpen(true);
+                    localStorage.setItem('settingsOpen', JSON.stringify(true))
+                }}>
                     ⚙
                 </button>
 
