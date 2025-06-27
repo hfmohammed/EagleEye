@@ -32,4 +32,3 @@ networks:
       config:
         - subnet: "2001:db8:1::/64"
           gateway: "2001:db8:1::1"
-
