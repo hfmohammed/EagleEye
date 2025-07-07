@@ -3,7 +3,9 @@ import { SettingsContext } from '../context/SettingsContext';
 import { DataContext } from '../context/DataContext';
 
 const drawAnnotations = (ctx, annotations, scaleX, scaleY) => {
+    console.log(ctx, annotations);
     if (!ctx || !annotations) return;
+
     annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
         const scaledX1 = x1 * scaleX;
         const scaledY1 = y1 * scaleY;
@@ -188,6 +190,9 @@ const Camera = ({ onDataUpdate }) => {
 
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
+
+                        const scaleX = outputCanvas.width / image.width;
+                        const scaleY = outputCanvas.height / image.height;
 
                         if (enableAnnotationsRef.current) {
                             drawAnnotations(ctx, message.annotations, scaleX, scaleY);
