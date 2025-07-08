@@ -8,7 +8,7 @@ const Header = () => {
     const { isAuthenticated, setIsAuthenticated } = useContext(AuthenticationContext);
 
     const signout = () => {
-      axios.post('http://localhost:5700/logout', {
+    axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/logout`, {
         access_token: localStorage.getItem('access_token') || '',
         refresh_token: localStorage.getItem('refresh_token') || '',
       }, {
@@ -18,21 +18,13 @@ const Header = () => {
       }).then((res) => {
         if (res.data.status_code === 200) {
           setIsAuthenticated(false);
-          localStorage.setItem('access_token', '');
-          localStorage.setItem('refresh_token', '');
-          localStorage.setItem('username', '');
+          localStorage.clear();
         } else {
           setIsAuthenticated(false);
-          localStorage.setItem('access_token', '');
-          localStorage.setItem('refresh_token', '');
-          localStorage.setItem('username', '');
           console.log("Logout failed:", res.data.message);
         }
       }).catch((err) => {
         setIsAuthenticated(false);
-        localStorage.setItem('access_token', '');
-        localStorage.setItem('refresh_token', '');
-        localStorage.setItem('username', '');
         console.error("Logout error:", err);
       });
     }

@@ -1,15 +1,17 @@
 import React, {useContext, useEffect, useState} from 'react';
 import { AuthenticationContext } from "../context/AuthenticationContext.jsx";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const {isAuthenticated, setIsAuthenticated} = useContext(AuthenticationContext);
-
+  const navigate = useNavigate();  
+  
   useEffect(() => {
-    axios.post('http://localhost:5700/login', {
+    axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/login`, {
       username: localStorage.getItem('username') || '',
       password: '',
       access_token: localStorage.getItem('access_token') || '',
@@ -23,8 +25,9 @@ const Login = () => {
       if (res.data.status_code === 200) {
         localStorage.setItem('access_token', res.data.access_token);
         localStorage.setItem('refresh_token', res.data.refresh_token);
-        localStorage.setItem('username', res.username);
+        localStorage.setItem('username', res.data.username);
         setIsAuthenticated(true);
+        navigate('/');
       } else {
         console.log("error");
       }
@@ -39,7 +42,7 @@ const Login = () => {
       return;
     }
 
-    axios.post('http://localhost:5700/login', {
+    axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/login`, {
         username: username,
         password: password,
         access_token: localStorage.getItem('access_token') || '',
@@ -52,22 +55,14 @@ const Login = () => {
       if (res.data.status_code === 200) {
         localStorage.setItem('access_token', res.data.access_token);
         localStorage.setItem('refresh_token', res.data.refresh_token);
-        localStorage.setItem('username', res.username);
+        localStorage.setItem('username', res.data.username);
         setIsAuthenticated(true);
+        navigate('/');
       } else {
         setError(res.data.message);
       }
     })
   };
-
-  if (isAuthenticated) {
-    return (
-      <div style={{ padding: '2rem' }}>
-        <h2>Welcome, {username}!</h2>
-        <p>You are now logged in.</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ maxWidth: '400px', margin: '5rem auto', padding: '2rem', border: '1px solid #ddd', borderRadius: '8px' }}>
