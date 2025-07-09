@@ -11,13 +11,14 @@ const Settings = () => {
 
   const bottomRef = useRef(null); // 👇 Ref to scroll target
 
+
   // Update local state when context values change
   useEffect(() => {
     console.log(rtspLinks)
     setSelectedSource(inputSource);
     setEditedFps(fps);
     setEditedRtspLinks(rtspLinks);
-  }, [inputSource, fps, rtspLinks]);
+  }, [inputSource, fps, rtspLinks, settingsOpen]);
 
   //
   useEffect(() => {
@@ -31,14 +32,14 @@ const Settings = () => {
     setSelectedSource(newSource);
   };
 
-  const _saveSettings = () => {
+  const _saveSettings = async () => {
     if (selectedSource === "webcam") {
       null;
       // setEditedRtspLinks([]); // Clear RTSP link if webcam is selected
     }
 
     console.log('Saving settings:', { editedFps, editedRtspLinks, selectedSource });
-    const newErrors = saveSettings(editedFps, editedRtspLinks, selectedSource);
+    const newErrors = await saveSettings(editedFps, editedRtspLinks, selectedSource);
     console.log("NEW ERRORS", newErrors);
 
     if (newErrors.length > 0) {
@@ -76,18 +77,25 @@ const Settings = () => {
 
             <div className="flex flex-col space-y-4 my-4">
               <div className="flex items-center fps-input-section">
-                <label className="mx-1">FPS:</label>
                 <input
                   className="mx-2 px-1 bg-white rounded border-gray-600 border-1 fps-input"
                   type="number"
                   value={editedFps}
-                  onChange={(e) => {
-                    setEditedFps(e.target.value);
-                  }}
+                  onChange={(e) => setEditedFps(Number(e.target.value))}
                   min={1}
-                  max={100}
+                  max={40}
                   step={1}
                 />
+                <input
+                  className="mx-2 px-1 bg-white rounded border-gray-600 border-1 fps-input"
+                  type="range"
+                  value={editedFps}
+                  onChange={(e) => setEditedFps(Number(e.target.value))}
+                  min={1}
+                  max={40}
+                  step={1}
+                />
+                <span className="text-sm mt-1 text-center">{editedFps} FPS</span>
               </div>
 
               <div className="flex items-center source-input-section">
@@ -134,9 +142,8 @@ const Settings = () => {
                         />
 
                         <button
-                          className={`rounded px-2 py-1 ml-2 ${editedRtspLinks.length > 1 ? 'bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer' : 'disabled cursor-not-allowed bg-gray-400 text-white'}`}
+                          className={`rounded px-2 py-1 ml-2 ${'bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer'}`}
                           onClick={() => {
-                            if (editedRtspLinks.length <= 1) return;
                             setEditedRtspLinks(editedRtspLinks.filter((_, i) => i !== index));
                           }}
                         >

@@ -21,6 +21,7 @@ import uuid
 from dateutil.parser import parse as parse_datetime
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 
 # logging.basicConfig(level=logging.DEBUG)
 app = FastAPI()
@@ -85,6 +86,9 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
             # === Apply YOLO or your processing ===
             try:
+                current_time = time.time()
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
+                
                 print("analyzing...")
                 results = model(frame, conf=0.2)
                 print("analyzed...")
@@ -106,7 +110,6 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     })
                     category_counts[label] = category_counts.get(label, 0) + 1
 
-                current_time = time.time()
                 frame_times.append(current_time)
                 frame_times = [t for t in frame_times if current_time - t <= 60]
                 fps = len(frame_times) / (current_time - frame_times[0]) if len(frame_times) > 1 else None
@@ -118,7 +121,6 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
                 print("decoding...")
                 jpeg_b64 = base64.b64encode(buf.tobytes()).decode("utf-8")
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
 
                 await ws.send_text(json.dumps({
                     "image": jpeg_b64,
@@ -296,6 +298,11 @@ class Tokens(BaseModel):
 class RefreshRequest(BaseModel):
     refresh_token: str
 
+class Settings(BaseModel):
+    username: str
+    newFps: int
+    newRtspLinks: List[str]
+    newInputSource: str
 
 # =============== Auth helpers ===============
 ACCESS_SECRET_KEY = "access-secret-key"
@@ -451,11 +458,23 @@ def signup(user: UserCreate):
             ).isoformat()
         }).execute()
 
+        response = supabase.table("user_info").insert({
+            "username": user.username,
+            "fps": 2,
+            "rtspLinks": ["resources/cars.mp4", "resources/people.mp4"],
+            "inputSource": "rtsp",
+        }).execute()
+
         return {
+            "username": user.username,
             "status_code": status.HTTP_201_CREATED,
             "message": "User created",
             "access_token": access_token,
             "refresh_token": refresh_token,
+            "fps": 2,
+            "rtspLinks": ["resources/cars.mp4", "resources/people.mp4"],
+            "inputSource": "rtsp",
+            "enableAnnotationsRef": False,
             "token_type": "bearer"
         }
     
@@ -474,16 +493,24 @@ def login(user: UserLogin):
             if verify_access_token(user.access_token)["status_code"] != status.HTTP_200_OK:
                 print("Invalid access token")
                 raise ValueError("Invalid credentials or session")
-
+            
             print("access token verification successful")
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message": "Login successful",
-                "username": jwt.decode(user.access_token, ACCESS_SECRET_KEY, algorithms=[ALGORITHM]).get("username"),
-                "access_token": user.access_token,
-                "refresh_token": user.refresh_token,
-                "token_type": "bearer"
-            }
+
+            response = supabase.table("user_info").select("*").eq("username", user.username).execute()
+            print(response)
+            if response.data:
+                return {
+                    "status_code": status.HTTP_200_OK,
+                    "message": "Login successful",
+                    "username": jwt.decode(user.access_token, ACCESS_SECRET_KEY, algorithms=[ALGORITHM]).get("username"),
+                    "access_token": user.access_token,
+                    "refresh_token": user.refresh_token,
+                    "token_type": "bearer",
+                    "fps": response.data[0]["fps"],
+                    "rtspLinks": response.data[0]["rtspLinks"],
+                    "inputSource": response.data[0]["inputSource"],
+                    "enableAnnotationsRef": response.data[0]["enableAnnotationsRef"],
+                }
         
         else:
             raise ValueError("Required parameters were not provided")
@@ -505,15 +532,23 @@ def login(user: UserLogin):
                 ).isoformat()
             }).execute()
 
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message": "Login successful",
-                "username": user.username,
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-                "token_type": "bearer"
-            }
-
+            response = supabase.table("user_info").select("*").eq("username", user.username).execute()
+            print(response)
+            if response.data:
+                return {
+                    "fps": response.data[0]["fps"],
+                    "rtspLinks": response.data[0]["rtspLinks"],
+                    "inputSource": response.data[0]["inputSource"],
+                    "enableAnnotationsRef": response.data[0]["enableAnnotationsRef"],
+                    "status_code": status.HTTP_200_OK,
+                    "message": "Login successful",
+                    "username": user.username,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token,
+                    "token_type": "bearer"
+                }
+            else:
+                raise Exception("no response from user_info")
         else:
             return {
                 "status_code": status.HTTP_401_UNAUTHORIZED,
@@ -619,3 +654,19 @@ def cleanup_tokens():
         "message": "Expired jti entries and refresh tokens",
     }
 
+@app.put("/saveSettings")
+def save_settings(settings: Settings):
+    print("saving settings........", settings.newFps, settings.newInputSource, settings.newRtspLinks)
+
+    response = supabase.table("user_info").update({
+        "fps": settings.newFps,
+        "inputSource": settings.newInputSource,
+        "rtspLinks": settings.newRtspLinks
+    }).eq("username", settings.username).execute()
+
+    print("saveSettings called:", response)
+
+    return {
+        "status_code": status.HTTP_200_OK,
+        "message": "Settings saved successfully",
+    }
