@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
-  const {isAuthenticated, setIsAuthenticated} = useContext(AuthenticationContext);
+  const { isAuthenticated, setIsAuthenticated } = useContext(AuthenticationContext);
   const navigate = useNavigate();  
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -18,87 +18,90 @@ const Signup = () => {
       access_token: localStorage.getItem('access_token') || '',
       refresh_token: localStorage.getItem('refresh_token') || '',
     }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     }).then((res) => {
-      console.log(res.data);
       if (res.data.status_code === 200) {
         localStorage.setItem('access_token', res.data.access_token);
         localStorage.setItem('refresh_token', res.data.refresh_token);
         localStorage.setItem('username', res.data.username);
         setIsAuthenticated(true);
+        setErrorMessage('');
         navigate('/');
-      } else {
-        console.log("error");
       }
-    })
-  }, [])
-
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/signup`, {
-        username,
-        password,
-        email,
-      });
-      console.log(response.data)
-
-      if (response.data.status_code === 201) {
-        setErrorMessage('')
+    await axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/signup`, {
+        username, password, email,
+    }).then((res) => {
+      if (res.data.status_code === 201) {
         setIsAuthenticated(true);
-        localStorage.setItem('access_token', response.data.access_token);
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-        navigate('/')
+        setErrorMessage('');
+        localStorage.setItem('access_token', res.data.access_token);
+        localStorage.setItem('refresh_token', res.data.refresh_token);
+        localStorage.setItem('username', res.data.username);
+        navigate('/');
+      } else {
+        setErrorMessage(res.data.message);
       }
-      else {
-        setErrorMessage(response.data.message);
-      }
-    } catch (error) {
-      setErrorMessage('Failed to sign up. Please try again.');
-      console.error('Signup error:', error);
-    }
+    }).catch((error) => {
+      setErrorMessage('Signup failed. Please try again.');
+    })
   };
 
   return (
-    <div>
-      <h2>Signup</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-md mx-auto mt-20 p-8 border border-gray-300 rounded-2xl shadow-md bg-white">
+      <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="username">Username</label>
+          <label className="block text-gray-700">Username</label>
           <input
             type="text"
-            id="username"
+            className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
         <div>
-          <label htmlFor="email">Email</label>
+          <label className="block text-gray-700">Email</label>
           <input
             type="email"
-            id="email"
+            className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
         <div>
-          <label htmlFor="password">Password</label>
+          <label className="block text-gray-700">Password</label>
           <input
             type="password"
-            id="password"
+            className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        <button type="submit">Signup</button>
+        {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+        <button
+          type="submit"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-200"
+        >
+          Sign Up
+        </button>
+        <p className="text-center text-sm mt-3">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate('/login')}
+            className="text-blue-600 hover:underline cursor-pointer"
+          >
+            Login
+          </span>
+        </p>
       </form>
     </div>
   );

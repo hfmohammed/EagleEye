@@ -7,21 +7,30 @@ export const DataProvider = ({ children }) => {
   const [cameraData, setCameraData] = useState({});
 
   const updateData = (cameraId, newData) => {
-    console.log("updatingdata")
+    console.log("Full newData:", newData); // Add this debug line
+    console.log("Latency2 value:", newData["latency"]); // Add this debug line
+    console.log(newData.hasOwnProperty('latency'));
+
     const currentTime = Date.now();
   
     setCameraData((prev) => {
-      console.log("jfajfkakjf", prev)
       const prevCam = prev[cameraId] || {
         fpsData: [],
+        latencyData: [],
         tableData: [],
         category_counts: {},
       };
+      console.log("jfajfkakjf", newData.latency)
+      console.log("jfajfkakjf", prevCam.fpsData)
+      console.log("jfajfkakjf", prevCam.latencyData)
   
       return {
         ...prev,
         [cameraId]: {
           fpsData: [...prevCam.fpsData, { time: currentTime, fps: newData.fps }].filter(
+            (e) => currentTime - e.time <= 60000
+          ),
+          latencyData: [...prevCam.latencyData, {time: currentTime, latency: newData.latency}].filter(
             (e) => currentTime - e.time <= 60000
           ),
           tableData: [...prevCam.tableData, { timestamp: newData.timestamp, count: newData.count }].filter(
