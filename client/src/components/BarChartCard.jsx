@@ -1,5 +1,5 @@
 import React from 'react';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,15 +23,15 @@ ChartJS.register(
   Legend
 );
 
-function LineChartCard({ data, title }) {
+function BarChartCard({ data, title }) {
   return (
     <div className="bg-white rounded-2xl shadow p-4 flex-1 overflow-hidden flex flex-col items-center">
       <h2 className="text-xl font-semibold mb-4 text-gray-700">{title}</h2>
       <div className="h-full w-full flex items-center justify-center">
-        <Line data={data} />
+        <Bar data={data} />
       </div>
     </div>
   );
 }
 
-export default LineChartCard;
+export default BarChartCard;

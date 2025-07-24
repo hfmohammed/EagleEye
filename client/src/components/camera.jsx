@@ -3,7 +3,9 @@ import { SettingsContext } from '../context/SettingsContext';
 import { DataContext } from '../context/DataContext';
 
 const drawAnnotations = (ctx, annotations, scaleX, scaleY) => {
+    console.log(ctx, annotations);
     if (!ctx || !annotations) return;
+
     annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
         const scaledX1 = x1 * scaleX;
         const scaledY1 = y1 * scaleY;
@@ -31,6 +33,8 @@ const Camera = ({ onDataUpdate }) => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState([]);
     const [annotations, setAnnotations] = useState({});
+    const [captureTime, setCaptureTime] = useState(null);
+    const [latency, setLatency] = useState(0);
     const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps, enableAnnotationsRef } = useContext(SettingsContext);
     const { setCameraData } = useContext(DataContext)
     // http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000
@@ -42,7 +46,6 @@ const Camera = ({ onDataUpdate }) => {
             if (!isCameraEnabled) {
                 console.log(import.meta.env.VITE_WEBSOCKET_URL);
                 socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_RTSP_URL);
-                let lastDrawTime = 0;
 
                 socket.current.onopen = () => {
                     setSwitchSource(false);
@@ -64,21 +67,19 @@ const Camera = ({ onDataUpdate }) => {
                 }
 
                 socket.current.onmessage = (event) => {
-                    const now = Date.now();
-                    // if (now - lastDrawTime < 1000 / fps) {
-                    //     console.log("ignoring", now - lastDrawTime)
-                    //     return;
-                    // }
-
-                    console.log("success")
-                    lastDrawTime = now;
-
+                    console.log("success");
+                    
                     inFlight.current = false;
                     const message = JSON.parse(event.data);
                     console.log("RTSP message received:", message);
 
                     const image = new Image();
                     image.src = `data:image/jpeg;base64,${message.image}`;
+
+                    const timestamp = new Date(message.timestamp); // Ensure this is a Unix timestamp (milliseconds)
+                    const currentLatency = Date.now() - timestamp.getTime(); // Calculate latency in milliseconds
+                    setLatency(currentLatency);
+                    message.latency = currentLatency
 
                     image.onload = () => {
                         const index = message.index;
@@ -115,6 +116,7 @@ const Camera = ({ onDataUpdate }) => {
                         return copy;
                     });
 
+                    console.log("meessssssssage", message)
                     onDataUpdate(message);
                 };
 
@@ -174,10 +176,16 @@ const Camera = ({ onDataUpdate }) => {
                 socket.current.onmessage = (event) => {
                     inFlight.current = false;
                     const message = JSON.parse(event.data);
+                    console.log(message);
                     const image = new Image();
                     image.src = `data:image/jpeg;base64,${message.image}`;
 
+                    const currentLatency = Date.now() - captureTime;
+                    setLatency(currentLatency);
+                    message.latency = currentLatency
+
                     image.onload = () => {
+
                         const outputCanvas = canvasOutputRef.current[0];
                         const ctx = outputCanvas?.getContext('2d');
                         const ratio = image.width / image.height;
@@ -189,6 +197,7 @@ const Camera = ({ onDataUpdate }) => {
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
 
+
                         const scaleX = outputCanvas.width / image.width;
                         const scaleY = outputCanvas.height / image.height;
 
@@ -199,6 +208,8 @@ const Camera = ({ onDataUpdate }) => {
 
                     setObjectCount([message.count]);
                     setAnnotations([message.annotations]);
+
+                    console.log("meessssssssage", message)
                     onDataUpdate(message);
                 };
 
@@ -221,11 +232,15 @@ const Camera = ({ onDataUpdate }) => {
 
     const emitFrameToServer = useCallback(() => {
         if (inFlight.current) return;
+
         const video = videoRef.current;
         if (video && video.srcObject) {
             inFlight.current = true;
             const stream = video.srcObject;
             const videoTrack = stream.getVideoTracks()[0];
+            
+            setCaptureTime(Date.now());
+            console.log("captured on", captureTime);
             const imageCapture = new ImageCapture(videoTrack);
 
             imageCapture.grabFrame()
@@ -306,6 +321,7 @@ const Camera = ({ onDataUpdate }) => {
 
     return (
         <section className='camera grid grid-cols-1 sm:grid-cols-2 gap-6 items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1'>
+            {console.log(rtspLinks)}
             {!isCameraEnabled && (
                 rtspLinks.map((rtspLink, index) => (
                     <div key={index} id={rtspLink}
@@ -322,6 +338,7 @@ const Camera = ({ onDataUpdate }) => {
                                     )}
                                     <h1 className='text-center text-red-500'>FPS set: {fps}</h1>
                                     <h2 className='text-center'>Detected Objects: {objectCount[index]}</h2>
+                                    <h2 className='text-center'>Latency: {latency}</h2>
                                 </>
                             ) : (
                                 <h1 className='text-center text-red-500'>Camera is not streaming</h1>

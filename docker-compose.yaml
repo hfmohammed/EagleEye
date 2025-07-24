@@ -15,7 +15,7 @@ services:
     build:
       context: ./socket
     ports:
-      - "[2605:fd00:4:1000:f816:3eff:fe47:4c5c]:5700:5700"
+      - "5700:5700"
     working_dir: /app
     volumes:
       - ./socket:/app
