@@ -6,7 +6,7 @@ const OAuthCallback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:5700/auth/user", {
+    axios.get(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/auth/user`, {
       withCredentials: true
     }).then(async (res) => {
       const user = res.data;

@@ -12,7 +12,7 @@ export default defineConfig({
   server: {
     host: '::', // Enables listening on IPv6
     port: 5173,
-    allowedHosts: ['eagleeye.ooguy.com', 'localhost'],
+    allowedHosts: ['eagleeye.ooguy.com', 'localhost', 'eagleeye.giize.com'],
     proxy: {
       "/api": {
         target: "http://127.0.0.1:8000", // Django backend
