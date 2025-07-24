@@ -1,11 +1,11 @@
 import './index.css';
-import Header from './components/header';
-import Settings from './components/settings';
-import Main from './components/main';
-import Footer from './components/footer';
-import Login from './components/login';
-import Signup from './components/signup';
-import OAuthCallback from './components/OAuthCallback';
+import Header from './components/enhanced-header';
+import Settings from './components/enhanced-settings';
+import Main from './components/enhanced-main';
+import Footer from './components/enhanced-footer';
+import Login from './components/enhanced-login';
+import Signup from './components/enhanced-signup';
+import OAuthCallback from './context/OAuthCallback';
 import { DataProvider } from './context/DataContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthenticationContext } from './context/AuthenticationContext.jsx';
