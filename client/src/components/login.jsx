@@ -10,7 +10,7 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const { isAuthenticated, setIsAuthenticated } = useContext(AuthenticationContext);
   const { isCameraEnabled, setIsCameraEnabled, toggleCamera, inFlight, switchSource, setSwitchSource, fps, setFps, saveSettings, rtspLinks, setRtspLinks, inputSource, setInputSource, settingsOpen, setSettingsOpen, selectedTab, setSelectedTab, enableAnnotationsRef } = useContext(SettingsContext);
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
   
   useEffect(() => {
     axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/login`, {
@@ -22,7 +22,7 @@ const Login = () => {
       headers: { 'Content-Type': 'application/json' }
     }).then((res) => {
       console.log(res.data)
-      if (res.data.status_code === 200) {
+      if (res.data && res.data.status_code === 200) {
         localStorage.setItem('access_token', res.data.access_token);
         localStorage.setItem('refresh_token', res.data.refresh_token);
         localStorage.setItem('username', res.data.username);
@@ -33,8 +33,9 @@ const Login = () => {
         setInputSource(res.data.inputSource);
         localStorage.setItem('inputSource', res.data.inputSource);
         
-        enableAnnotationsRef.current = res.data.enableAnnotationsRef
-        localStorage.setItem('enableAnnotationsRef', res.data.enableAnnotationsRef);
+        enableAnnotationsRef.current = JSON.parse(localStorage.getItem("enableAnnotationsRef") || "false");
+
+        localStorage.setItem('enableAnnotationsRef', JSON.stringify(enableAnnotationsRef.current));
         
         setRtspLinks(res.data.rtspLinks);
         localStorage.setItem('rtspLinks', JSON.stringify(res.data.rtspLinks));
@@ -45,6 +46,10 @@ const Login = () => {
       }
     });
   }, []);
+
+  const oAuthSignIn = () => {
+    window.location.href = `${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/auth/login`;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -74,11 +79,11 @@ const Login = () => {
         localStorage.setItem('inputSource', res.data.inputSource);
         
         enableAnnotationsRef.current = res.data.enableAnnotationsRef
-        localStorage.setItem('enableAnnotationsRef', res.data.enableAnnotationsRef);
+        localStorage.setItem('enableAnnotationsRef', JSON.stringify(enableAnnotationsRef.current));
         
         setRtspLinks(res.data.rtspLinks);
         localStorage.setItem('rtspLinks', JSON.stringify(res.data.rtspLinks));
-        
+
         setErrorMessage('');
         setIsAuthenticated(true);
         navigate('/');
@@ -86,7 +91,7 @@ const Login = () => {
         setErrorMessage(res.data.message);
       }
     }).catch((error) => {
-        setErrorMessage('Signup failed. Please try again.');
+        setErrorMessage('Login failed. Please try again.');
     })
   };
 
@@ -115,12 +120,22 @@ const Login = () => {
           />
         </div>
         {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+
         <button
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-200"
         >
           Login
         </button>
+
+        <button
+          type="submit"
+          className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition duration-200"
+          onClick={oAuthSignIn}
+        >
+          Continue with Google
+        </button>
+
         <p className="text-center text-sm mt-3">
           Don't have an account?{" "}
           <span

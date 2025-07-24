@@ -5,6 +5,7 @@ import Main from './components/main';
 import Footer from './components/footer';
 import Login from './components/login';
 import Signup from './components/signup';
+import OAuthCallback from './components/OAuthCallback';
 import { DataProvider } from './context/DataContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthenticationContext } from './context/AuthenticationContext.jsx';
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/oauth" element={<OAuthCallback />} />
 
           {/* Protected route */}
           <Route path="/" element={

@@ -11,6 +11,10 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const oAuthSignIn = () => {
+    window.location.href = `${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/auth/login`;
+  };
+
   useEffect(() => {
     axios.post(`${import.meta.env.VITE_WEBSOCKET_PROTOCOL}://${import.meta.env.VITE_WEBSOCKET_HOST}:${import.meta.env.VITE_WEBSOCKET_PORT}/login`, {
       username: localStorage.getItem('username') || '',
@@ -93,6 +97,16 @@ const Signup = () => {
         >
           Sign Up
         </button>
+
+        <button
+          type="submit"
+          className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition duration-200"
+          onClick={oAuthSignIn}
+        >
+          Continue with Google
+        </button>
+
+
         <p className="text-center text-sm mt-3">
           Already have an account?{" "}
           <span

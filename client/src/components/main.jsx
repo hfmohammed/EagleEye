@@ -5,7 +5,7 @@ import PieChartCard from './PieChartCard';
 import LineChartCard from './LineChartCard';
 import DetectionTable from './DetectionTable';
 import { SettingsContext } from '../context/SettingsContext';
-
+import BarChartCard from './BarChartCard';
 
 function Main() {
   const { cameraData, updateData } = useContext(DataContext);
@@ -21,6 +21,7 @@ function Main() {
     fpsData: [],
     latencyData: [],
     tableData: [],
+    personCountData: [],
     category_counts: {},
   };
 
@@ -61,6 +62,27 @@ function Main() {
       data: activeData.tableData.map((entry) => entry.count),
       borderColor: '#36A2EB',
       fill: false,
+    }],
+  };
+
+  const personCountLineChartData = {
+    labels: activeData.personCountData.map((entry) => new Date(entry.time).toLocaleTimeString()),
+    datasets: [{
+      label: 'Detections Over Time',
+      data: activeData.personCountData.map((entry) => entry.count),
+      borderColor: '#36A2EB',
+      fill: false,
+    }],
+  };
+
+  const personCountBarChartData = {
+    labels: activeData.personCountData.map((entry) => new Date(entry.time).toLocaleTimeString()),
+    datasets: [{
+      label: 'Person Count',
+      data: activeData.personCountData.map((entry) => entry.count),
+      backgroundColor: '#FF6384',
+      borderColor: '#FF6384',
+      borderWidth: 1,
     }],
   };
 
@@ -115,8 +137,8 @@ function Main() {
       <div className={'flex flex-row gap-6 h-84'}>
         <LineChartCard data={latencyLineChartData} title="Latency over time" />
         <LineChartCard data={detectionsLineChartData} title="Detections over time" />
-        <LineChartCard data={latencyLineChartData} title="Latency over time" />
-        <LineChartCard data={latencyLineChartData} title="Latency over time" />
+        <LineChartCard data={personCountLineChartData} title="Person Count over time" />
+        <BarChartCard data={personCountBarChartData} title="Person Count over time" />
       </div>
       <DetectionTable rows={activeData.tableData} />
     </main>

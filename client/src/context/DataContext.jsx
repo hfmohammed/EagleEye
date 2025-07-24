@@ -19,6 +19,7 @@ export const DataProvider = ({ children }) => {
         latencyData: [],
         tableData: [],
         category_counts: {},
+        personCountData: [],
       };
       console.log("jfajfkakjf", newData.latency)
       console.log("jfajfkakjf", prevCam.fpsData)
@@ -35,6 +36,9 @@ export const DataProvider = ({ children }) => {
           ),
           tableData: [...prevCam.tableData, { timestamp: newData.timestamp, count: newData.count }].filter(
             (e) => currentTime - new Date(e.timestamp).getTime() <= 60000
+          ),
+          personCountData: [...prevCam.personCountData, { time: currentTime, count: newData.category_counts.person }].filter(
+            (e) => currentTime - e.time <= 60000
           ),
           category_counts: newData.category_counts,
         },

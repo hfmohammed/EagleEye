@@ -22,6 +22,12 @@ from dateutil.parser import parse as parse_datetime
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, JSONResponse
+from authlib.integrations.starlette_client import OAuth
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.config import Config
+
 
 # logging.basicConfig(level=logging.DEBUG)
 app = FastAPI()
@@ -32,7 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(SessionMiddleware, secret_key="super-secret")
 
+config = Config('.env')
 model = YOLO("yolov8n.pt")
 
 load_dotenv()
@@ -460,6 +468,7 @@ def signup(user: UserCreate):
 
         response = supabase.table("user_info").insert({
             "username": user.username,
+            "email": user.email,
             "fps": 2,
             "rtspLinks": ["resources/cars.mp4", "resources/people.mp4"],
             "inputSource": "rtsp",
@@ -669,4 +678,109 @@ def save_settings(settings: Settings):
     return {
         "status_code": status.HTTP_200_OK,
         "message": "Settings saved successfully",
+    }
+
+oauth = OAuth(config)
+oauth.register(
+    name='google',
+    client_id=os.getenv("VITE_GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("VITE_GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={"scope": "openid email profile"},
+)
+
+@app.get("/auth/login")
+async def oauth_login(request: Request):
+    redirect_uri = request.url_for("auth_callback")
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
+@app.get("/auth/callback")
+async def auth_callback(request: Request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        print("Token response:", token)
+    except Exception as e:
+        print("Failed to authorize access token:", e)
+        return JSONResponse({"error": "OAuth authorization failed"}, status_code=400)
+
+    try:
+        userinfo = token.get("userinfo")
+        print("Userinfo:::", userinfo)
+
+        if not userinfo or "email" not in userinfo:
+            return JSONResponse({"error": "Invalid user info"}, status_code=400)
+
+        user_email = userinfo.get("email")
+
+        # Check if user exists
+        existing_user_info = supabase.table("user_info").select("*").eq("username", user_email).execute()
+        existing_user_login = supabase.table("users_login").select("*").eq("username", user_email).execute()
+
+        if not existing_user_login.data and not existing_user_info.data:
+            print("Creating new user in Supabase...")
+            supabase.table("users_login").insert({
+                "username": user_email,
+                "password": hash_password("oauth_dummy"),
+            }).execute()
+            print("created user login")
+
+            supabase.table("user_info").insert({
+                "username": user_email,
+                "email": user_email,
+                "fps": 2,
+                "rtspLinks": ["resources/cars.mp4", "resources/people.mp4"],
+                "inputSource": "rtsp",
+                "enableAnnotationsRef": False
+            }).execute()
+            print("created user login")
+
+
+        # === Issue JWT tokens ===
+        access_token = create_access_token({"username": user_email})
+        refresh_token = create_refresh_token({"username": user_email})
+
+        # Store refresh token in DB
+        supabase.table("refresh_tokens").insert({
+            "username": user_email,
+            "token": refresh_token,
+            "disabled": False,
+            "expire_at": datetime.fromtimestamp(
+                jwt.decode(refresh_token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])["exp"],
+                tz=timezone.utc
+            ).isoformat()
+        }).execute()
+
+        # Store in session
+        request.session["user"] = {
+            "email": user_email,
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
+
+        return RedirectResponse("http://localhost:5173/oauth")
+
+    except Exception as e:
+        print("OAuth callback error:", e)
+        return JSONResponse({"error": str(e)}, status_code=400)
+
+
+@app.get("/auth/user")
+def get_user(request: Request):
+    user = request.session.get("user")
+    if not user:
+        return {"error": "Not logged in"}
+
+    username = user["email"]
+    settings = supabase.table("user_info").select("*").eq("username", username).execute()
+    data = settings.data[0] if settings.data else {}
+
+    return {
+        "email": username,
+        "access_token": user["access_token"],
+        "refresh_token": user["refresh_token"],
+        "fps": data.get("fps", 2),
+        "rtspLinks": data.get("rtspLinks", []),
+        "inputSource": data.get("inputSource", "rtsp"),
+        "enableAnnotationsRef": data.get("enableAnnotationsRef", False)
     }
