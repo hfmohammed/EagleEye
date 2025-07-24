@@ -4,13 +4,9 @@ import base64
 import cv2
 import numpy as np
 from PIL import Image
-<<<<<<< HEAD
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-=======
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
->>>>>>> origin/main
 from ultralytics import YOLO
 import time
 import sys
@@ -18,7 +14,6 @@ import asyncio
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
-<<<<<<< HEAD
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
@@ -47,20 +42,10 @@ app.add_middleware(SessionMiddleware, secret_key="super-secret")
 
 config = Config('.env')
 model = YOLO("yolov8n.pt")
-=======
-
-
-app = FastAPI()
-model = YOLO("model_- 1 april 2024 14_16.pt")
->>>>>>> origin/main
 
 load_dotenv()
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_KEY")
-<<<<<<< HEAD
-print("supabase::", supabase_key)
-=======
->>>>>>> origin/main
 supabase: Client = create_client(supabase_url, supabase_key)
 
 
@@ -77,11 +62,7 @@ def updateDatabase(category_counts, total_item_count, fps, timestamp, index):
         "index": index,
     }
     response = supabase.table("EagleEye_traffic_data").insert(data).execute()
-<<<<<<< HEAD
     print("Database update response", response)
-=======
-    print("Database update response:", response)
->>>>>>> origin/main
 
 # http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000
 
@@ -93,19 +74,11 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
     streaming_task = None
     stream_active = False
 
-<<<<<<< HEAD
     async def stream_frames(stream_url, index, desired_fps):
         nonlocal stream_active
         cap = cv2.VideoCapture(stream_url)
         if not cap.isOpened():
             await ws.send_text(json.dumps({"message": "Failed to open RTSP stream"}))
-=======
-    async def stream_frames(stream_url, index, desired_fps, stream_url_count):
-        nonlocal stream_active
-        cap = cv2.VideoCapture(stream_url)
-        if not cap.isOpened():
-            await ws.send_text(json.dumps({"error": "Failed to open RTSP stream"}))
->>>>>>> origin/main
             return
 
         frame_times = []
@@ -113,7 +86,6 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
 
         while stream_active:
             start_time = time.time()
-<<<<<<< HEAD
             
             ret, frame = cap.read()
             if not ret:
@@ -132,23 +104,6 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                 print("boxes...")
                 count = len(boxes)
                 print("len::", count)
-=======
-
-            for _ in range(int(30 * stream_url_count / desired_fps)):  # discard old frames
-                cap.grab()
-
-            
-            ret, frame = cap.read()
-            if not ret:
-                await ws.send_text(json.dumps({"error": "Failed to read frame"}))
-                break
-
-            # === Apply YOLO or your processing ===
-            try:
-                results = model(frame, conf=0.2)
-                boxes = results[0].boxes
-                count = len(boxes)
->>>>>>> origin/main
                 annotations = []
                 category_counts = {}
 
@@ -163,33 +118,17 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     })
                     category_counts[label] = category_counts.get(label, 0) + 1
 
-<<<<<<< HEAD
-=======
-                    # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                    # cv2.putText(frame, f"{label} {conf:.2f}", (x1, y1 - 10),
-                    #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
-                current_time = time.time()
->>>>>>> origin/main
                 frame_times.append(current_time)
                 frame_times = [t for t in frame_times if current_time - t <= 60]
                 fps = len(frame_times) / (current_time - frame_times[0]) if len(frame_times) > 1 else None
 
-<<<<<<< HEAD
                 print("encoding...")
-=======
->>>>>>> origin/main
                 _, buf = cv2.imencode(".jpeg", frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
                 if buf is None:
                     continue
 
-<<<<<<< HEAD
                 print("decoding...")
                 jpeg_b64 = base64.b64encode(buf.tobytes()).decode("utf-8")
-=======
-                jpeg_b64 = base64.b64encode(buf.tobytes()).decode("utf-8")
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time))
->>>>>>> origin/main
 
                 await ws.send_text(json.dumps({
                     "image": jpeg_b64,
@@ -202,7 +141,6 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     "camera_id": f"camera {index}"
                 }))
                 updateDatabase(category_counts, count, fps, timestamp, index)
-<<<<<<< HEAD
                 print("db updated")
 
                 elapsed = time.time() - start_time
@@ -214,14 +152,6 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
             except Exception as e:
                 print(e)
                 await ws.send_text(json.dumps({"message": f"YOLO error: {str(e)}"}))
-=======
-
-                elapsed = time.time() - start_time
-                await asyncio.sleep(max(0, (1 / desired_fps) - elapsed))
-
-            except Exception as e:
-                await ws.send_text(json.dumps({"error": f"YOLO error: {str(e)}"}))
->>>>>>> origin/main
                 break
 
         cap.release()
@@ -244,11 +174,7 @@ async def rtsp_websocket_endpoint(ws: WebSocket):
                     stream_active = True
                     # Start a streaming task for each RTSP URL
                     streaming_task = [
-<<<<<<< HEAD
                         asyncio.create_task(stream_frames(url, idx, desired_fps))
-=======
-                        asyncio.create_task(stream_frames(url, idx, desired_fps, len(stream_url_list)))
->>>>>>> origin/main
                         for idx, url in enumerate(stream_url_list)
                     ]
 
@@ -354,7 +280,6 @@ async def websocket_endpoint(ws: WebSocket):
 
     except WebSocketDisconnect:
         print("Client disconnected")
-<<<<<<< HEAD
 
 
 # ================ Models ================
@@ -859,5 +784,3 @@ def get_user(request: Request):
         "inputSource": data.get("inputSource", "rtsp"),
         "enableAnnotationsRef": data.get("enableAnnotationsRef", False)
     }
-=======
->>>>>>> origin/main

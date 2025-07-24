@@ -15,10 +15,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@tailwindcss/vite": "^4.0.7",
     "axios": "^1.7.9",
-<<<<<<< HEAD
     "bcryptjs": "^3.0.2",
-=======
->>>>>>> origin/main
     "chart.js": "^4.4.9",
     "chartjs": "^0.3.24",
     "class-variance-authority": "^0.7.0",
@@ -26,10 +23,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.4",
     "dotenv": "^16.4.7",
-<<<<<<< HEAD
     "js-sha256": "^0.11.1",
-=======
->>>>>>> origin/main
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.475.0",
     "micromark-util-combine-extensions": "^2.0.1",
@@ -38,11 +32,7 @@
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.0.0",
-<<<<<<< HEAD
     "react-router-dom": "^7.6.3"
-=======
-    "react-router-dom": "^7.2.0"
->>>>>>> origin/main
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

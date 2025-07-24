@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { SettingsContext } from '../context/SettingsContext';
-<<<<<<< HEAD
 import axios from "axios";
 import {AuthenticationContext} from "../context/AuthenticationContext.jsx";
 
@@ -29,11 +28,6 @@ const Header = () => {
         console.error("Logout error:", err);
       });
     }
-=======
-
-const Header = () => {
-    const { settingsOpen, setSettingsOpen } = useContext(SettingsContext);
->>>>>>> origin/main
 
     return (
         <header className="bg-white shadow-md px-6 py-4 flex items-center justify-between">
@@ -44,23 +38,12 @@ const Header = () => {
 
             <section className="flex items-center space-x-4">
                 {/* Settings Button */}
-<<<<<<< HEAD
                 <button className='bg-gray-300 text-white rounded-full cursor-pointer px-3 py-2 hover:bg-gray-400' onClick={() => setSettingsOpen(!settingsOpen)}>
-=======
-                <button className='bg-gray-300 text-white rounded-full cursor-pointer px-3 py-2 hover:bg-gray-400' onClick={() => {
-                    setSettingsOpen(true);
-                    localStorage.setItem('settingsOpen', JSON.stringify(true))
-                }}>
->>>>>>> origin/main
                     ⚙
                 </button>
 
                 {/* Sign Out Button */}
-<<<<<<< HEAD
                 <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 hover:cursor-pointer" onClick={() => signout()}>
-=======
-                <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 hover:cursor-pointer">
->>>>>>> origin/main
                     Sign out
                 </button>
             </section>

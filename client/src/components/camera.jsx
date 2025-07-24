@@ -3,13 +3,9 @@ import { SettingsContext } from '../context/SettingsContext';
 import { DataContext } from '../context/DataContext';
 
 const drawAnnotations = (ctx, annotations, scaleX, scaleY) => {
-<<<<<<< HEAD
     console.log(ctx, annotations);
     if (!ctx || !annotations) return;
 
-=======
-    if (!ctx || !annotations) return;
->>>>>>> origin/main
     annotations.forEach(({ x1, y1, x2, y2, label, confidence }) => {
         const scaledX1 = x1 * scaleX;
         const scaledY1 = y1 * scaleY;
@@ -37,11 +33,8 @@ const Camera = ({ onDataUpdate }) => {
     const [isStreaming, setIsStreaming] = useState(false);
     const [objectCount, setObjectCount] = useState([]);
     const [annotations, setAnnotations] = useState({});
-<<<<<<< HEAD
     const [captureTime, setCaptureTime] = useState(null);
     const [latency, setLatency] = useState(0);
-=======
->>>>>>> origin/main
     const { isCameraEnabled, setIsCameraEnabled, inFlight, switchSource, setSwitchSource, rtspLinks, fps, enableAnnotationsRef } = useContext(SettingsContext);
     const { setCameraData } = useContext(DataContext)
     // http://47.51.131.147/-wvhttp-01-/GetOneShot?image_size=1280x720&frame_count=1000000000
@@ -53,10 +46,6 @@ const Camera = ({ onDataUpdate }) => {
             if (!isCameraEnabled) {
                 console.log(import.meta.env.VITE_WEBSOCKET_URL);
                 socket.current = new WebSocket(import.meta.env.VITE_WEBSOCKET_RTSP_URL);
-<<<<<<< HEAD
-=======
-                let lastDrawTime = 0;
->>>>>>> origin/main
 
                 socket.current.onopen = () => {
                     setSwitchSource(false);
@@ -78,20 +67,8 @@ const Camera = ({ onDataUpdate }) => {
                 }
 
                 socket.current.onmessage = (event) => {
-<<<<<<< HEAD
                     console.log("success");
                     
-=======
-                    const now = Date.now();
-                    // if (now - lastDrawTime < 1000 / fps) {
-                    //     console.log("ignoring", now - lastDrawTime)
-                    //     return;
-                    // }
-
-                    console.log("success")
-                    lastDrawTime = now;
-
->>>>>>> origin/main
                     inFlight.current = false;
                     const message = JSON.parse(event.data);
                     console.log("RTSP message received:", message);
@@ -99,14 +76,11 @@ const Camera = ({ onDataUpdate }) => {
                     const image = new Image();
                     image.src = `data:image/jpeg;base64,${message.image}`;
 
-<<<<<<< HEAD
                     const timestamp = new Date(message.timestamp); // Ensure this is a Unix timestamp (milliseconds)
                     const currentLatency = Date.now() - timestamp.getTime(); // Calculate latency in milliseconds
                     setLatency(currentLatency);
                     message.latency = currentLatency
 
-=======
->>>>>>> origin/main
                     image.onload = () => {
                         const index = message.index;
                         const outputCanvas = canvasOutputRef.current[index];
@@ -142,10 +116,7 @@ const Camera = ({ onDataUpdate }) => {
                         return copy;
                     });
 
-<<<<<<< HEAD
                     console.log("meessssssssage", message)
-=======
->>>>>>> origin/main
                     onDataUpdate(message);
                 };
 
@@ -205,7 +176,6 @@ const Camera = ({ onDataUpdate }) => {
                 socket.current.onmessage = (event) => {
                     inFlight.current = false;
                     const message = JSON.parse(event.data);
-<<<<<<< HEAD
                     console.log(message);
                     const image = new Image();
                     image.src = `data:image/jpeg;base64,${message.image}`;
@@ -216,12 +186,6 @@ const Camera = ({ onDataUpdate }) => {
 
                     image.onload = () => {
 
-=======
-                    const image = new Image();
-                    image.src = `data:image/jpeg;base64,${message.image}`;
-
-                    image.onload = () => {
->>>>>>> origin/main
                         const outputCanvas = canvasOutputRef.current[0];
                         const ctx = outputCanvas?.getContext('2d');
                         const ratio = image.width / image.height;
@@ -233,10 +197,7 @@ const Camera = ({ onDataUpdate }) => {
                         ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
                         ctx.drawImage(image, 0, 0, outputCanvas.width, outputCanvas.height);
 
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
                         const scaleX = outputCanvas.width / image.width;
                         const scaleY = outputCanvas.height / image.height;
 
@@ -247,11 +208,8 @@ const Camera = ({ onDataUpdate }) => {
 
                     setObjectCount([message.count]);
                     setAnnotations([message.annotations]);
-<<<<<<< HEAD
 
                     console.log("meessssssssage", message)
-=======
->>>>>>> origin/main
                     onDataUpdate(message);
                 };
 
@@ -274,21 +232,15 @@ const Camera = ({ onDataUpdate }) => {
 
     const emitFrameToServer = useCallback(() => {
         if (inFlight.current) return;
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
         const video = videoRef.current;
         if (video && video.srcObject) {
             inFlight.current = true;
             const stream = video.srcObject;
             const videoTrack = stream.getVideoTracks()[0];
-<<<<<<< HEAD
             
             setCaptureTime(Date.now());
             console.log("captured on", captureTime);
-=======
->>>>>>> origin/main
             const imageCapture = new ImageCapture(videoTrack);
 
             imageCapture.grabFrame()
@@ -369,10 +321,7 @@ const Camera = ({ onDataUpdate }) => {
 
     return (
         <section className='camera grid grid-cols-1 sm:grid-cols-2 gap-6 items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md flex-1'>
-<<<<<<< HEAD
             {console.log(rtspLinks)}
-=======
->>>>>>> origin/main
             {!isCameraEnabled && (
                 rtspLinks.map((rtspLink, index) => (
                     <div key={index} id={rtspLink}
@@ -389,10 +338,7 @@ const Camera = ({ onDataUpdate }) => {
                                     )}
                                     <h1 className='text-center text-red-500'>FPS set: {fps}</h1>
                                     <h2 className='text-center'>Detected Objects: {objectCount[index]}</h2>
-<<<<<<< HEAD
                                     <h2 className='text-center'>Latency: {latency}</h2>
-=======
->>>>>>> origin/main
                                 </>
                             ) : (
                                 <h1 className='text-center text-red-500'>Camera is not streaming</h1>
