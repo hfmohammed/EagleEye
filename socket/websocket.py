@@ -683,8 +683,8 @@ def save_settings(settings: Settings):
 oauth = OAuth(config)
 oauth.register(
     name='google',
-    client_id=os.getenv("VITE_GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("VITE_GOOGLE_CLIENT_SEC"),
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SEC"),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={"scope": "openid email profile"},
 )
@@ -758,7 +758,8 @@ async def auth_callback(request: Request):
             "refresh_token": refresh_token
         }
 
-        return RedirectResponse("http://localhost:5173/oauth")
+        client_url = os.getenv("CLIENT_URL")
+        return RedirectResponse(f"{client_url}/oauth")
 
     except Exception as e:
         print("OAuth callback error:", e)
