@@ -9,4 +9,3 @@ yolov8n.pt
 socket/yolov8n.pt
 client/.env
 socket/.env
-
