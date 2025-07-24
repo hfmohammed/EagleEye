@@ -684,7 +684,7 @@ oauth = OAuth(config)
 oauth.register(
     name='google',
     client_id=os.getenv("VITE_GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("VITE_GOOGLE_CLIENT_SECRET"),
+    client_secret=os.getenv("VITE_GOOGLE_CLIENT_SEC"),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={"scope": "openid email profile"},
 )
