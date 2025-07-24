@@ -5,7 +5,11 @@ import PieChartCard from './PieChartCard';
 import LineChartCard from './LineChartCard';
 import DetectionTable from './DetectionTable';
 import { SettingsContext } from '../context/SettingsContext';
+<<<<<<< HEAD
 import BarChartCard from './BarChartCard';
+=======
+
+>>>>>>> origin/main
 
 function Main() {
   const { cameraData, updateData } = useContext(DataContext);
@@ -19,9 +23,13 @@ function Main() {
   
   const activeData = cameraData[selectedTab] || {
     fpsData: [],
+<<<<<<< HEAD
     latencyData: [],
     tableData: [],
     personCountData: [],
+=======
+    tableData: [],
+>>>>>>> origin/main
     category_counts: {},
   };
 
@@ -33,7 +41,11 @@ function Main() {
     }],
   };
 
+<<<<<<< HEAD
   const fpsLineChartData = {
+=======
+  const lineChartData = {
+>>>>>>> origin/main
     labels: activeData.fpsData.map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [{
       label: 'FPS Over Time',
@@ -43,6 +55,7 @@ function Main() {
     }],
   };
 
+<<<<<<< HEAD
   const latencyLineChartData = {
     labels: activeData.latencyData.map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [{
@@ -94,6 +107,19 @@ function Main() {
             <button
               key={id}
               onClick={() => setSelectedTab(id)}
+=======
+  return (
+    <main className="min-h-screen bg-gray-100 p-4 md:p-6 transition-all">
+      <div className='flex justify-between'>
+        <div className="mb-4 flex space-x-4 camera-data-controls">
+          {cameraIds.map((id) => (
+            <button
+              key={id}
+              onClick={() => {
+                setSelectedTab(id);
+                localStorage.setItem('selectedTab', `${id}`);
+              }}
+>>>>>>> origin/main
               className={`px-4 py-2 rounded hover:cursor-pointer hover:opacity-80 transition ${selectedTab === id ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             >
               {id}
@@ -101,7 +127,11 @@ function Main() {
           ))}
         </div>
 
+<<<<<<< HEAD
         <div className={''}>
+=======
+        <div className=''>
+>>>>>>> origin/main
           <button
             className={`px-4 py-2 rounded hover:cursor-pointer hover:opacity-80 transition ${enableAnnotationsRef.current ? 'bg-purple-500' : 'bg-gray-500'} text-white`}
             onClick={() => {
@@ -125,6 +155,7 @@ function Main() {
           />
         </div>
 
+<<<<<<< HEAD
         <div className="w-full lg:w-1/2 flex flex-col gap-6 max-h-screen">
           <div className={'flex-1'}>
             <PieChartCard data={pieChartData} />
@@ -140,6 +171,14 @@ function Main() {
         <LineChartCard data={personCountLineChartData} title="Person Count over time" />
         <BarChartCard data={personCountBarChartData} title="Person Count over time" />
       </div>
+=======
+        <div className="w-full lg:w-1/2 flex flex-col gap-6">
+          <PieChartCard data={pieChartData} />
+          <LineChartCard data={lineChartData} />
+        </div>
+      </div>
+
+>>>>>>> origin/main
       <DetectionTable rows={activeData.tableData} />
     </main>
   );

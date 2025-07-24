@@ -11,14 +11,21 @@ const Settings = () => {
 
   const bottomRef = useRef(null); // 👇 Ref to scroll target
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
   // Update local state when context values change
   useEffect(() => {
     console.log(rtspLinks)
     setSelectedSource(inputSource);
     setEditedFps(fps);
     setEditedRtspLinks(rtspLinks);
+<<<<<<< HEAD
   }, [inputSource, fps, rtspLinks, settingsOpen]);
+=======
+  }, [inputSource, fps, rtspLinks]);
+>>>>>>> origin/main
 
   //
   useEffect(() => {
@@ -32,14 +39,22 @@ const Settings = () => {
     setSelectedSource(newSource);
   };
 
+<<<<<<< HEAD
   const _saveSettings = async () => {
+=======
+  const _saveSettings = () => {
+>>>>>>> origin/main
     if (selectedSource === "webcam") {
       null;
       // setEditedRtspLinks([]); // Clear RTSP link if webcam is selected
     }
 
     console.log('Saving settings:', { editedFps, editedRtspLinks, selectedSource });
+<<<<<<< HEAD
     const newErrors = await saveSettings(editedFps, editedRtspLinks, selectedSource);
+=======
+    const newErrors = saveSettings(editedFps, editedRtspLinks, selectedSource);
+>>>>>>> origin/main
     console.log("NEW ERRORS", newErrors);
 
     if (newErrors.length > 0) {
@@ -49,6 +64,10 @@ const Settings = () => {
       setErrors([]);
       console.log("success");
       setSettingsOpen(false);
+<<<<<<< HEAD
+=======
+      localStorage.setItem('settingsOpen', JSON.stringify(false));
+>>>>>>> origin/main
     }
   }
 
@@ -72,15 +91,29 @@ const Settings = () => {
                 Settings
               </h1>
 
+<<<<<<< HEAD
               <button className="rounded-lg cursor-pointer bg-white px-4 py-2" onClick={() => setSettingsOpen(false)}>x</button>
+=======
+              <button className="rounded-lg cursor-pointer bg-white px-4 py-2" onClick={() => {
+                setSettingsOpen(false);
+                localStorage.setItem('settingsOpen', JSON.stringify(false));
+              }}>
+                x
+              </button>
+>>>>>>> origin/main
             </div>
 
             <div className="flex flex-col space-y-4 my-4">
               <div className="flex items-center fps-input-section">
+<<<<<<< HEAD
+=======
+                <label className="mx-1">FPS:</label>
+>>>>>>> origin/main
                 <input
                   className="mx-2 px-1 bg-white rounded border-gray-600 border-1 fps-input"
                   type="number"
                   value={editedFps}
+<<<<<<< HEAD
                   onChange={(e) => setEditedFps(Number(e.target.value))}
                   min={1}
                   max={40}
@@ -96,6 +129,15 @@ const Settings = () => {
                   step={1}
                 />
                 <span className="text-sm mt-1 text-center">{editedFps} FPS</span>
+=======
+                  onChange={(e) => {
+                    setEditedFps(e.target.value);
+                  }}
+                  min={1}
+                  max={100}
+                  step={1}
+                />
+>>>>>>> origin/main
               </div>
 
               <div className="flex items-center source-input-section">
@@ -142,8 +184,14 @@ const Settings = () => {
                         />
 
                         <button
+<<<<<<< HEAD
                           className={`rounded px-2 py-1 ml-2 ${'bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer'}`}
                           onClick={() => {
+=======
+                          className={`rounded px-2 py-1 ml-2 ${editedRtspLinks.length > 1 ? 'bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer' : 'disabled cursor-not-allowed bg-gray-400 text-white'}`}
+                          onClick={() => {
+                            if (editedRtspLinks.length <= 1) return;
+>>>>>>> origin/main
                             setEditedRtspLinks(editedRtspLinks.filter((_, i) => i !== index));
                           }}
                         >

@@ -15,7 +15,11 @@ services:
     build:
       context: ./socket
     ports:
+<<<<<<< HEAD
       - "5700:5700"
+=======
+      - "[2605:fd00:4:1000:f816:3eff:fe47:4c5c]:5700:5700"
+>>>>>>> origin/main
     working_dir: /app
     volumes:
       - ./socket:/app
@@ -32,4 +36,7 @@ networks:
       config:
         - subnet: "2001:db8:1::/64"
           gateway: "2001:db8:1::1"
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
