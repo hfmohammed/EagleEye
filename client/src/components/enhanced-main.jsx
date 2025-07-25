@@ -184,7 +184,7 @@ function Main() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Camera Feed */}
         <div className="w-full lg:w-1/2 flex">
-          <div className="w-full bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700 p-6">
+          <div className="flex items-center justify-center w-full bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700 p-6">
             <Camera
               onDataUpdate={(data) => {
                 const camId = data.camera_id ?? `camera ${data.index}`
