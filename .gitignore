@@ -1,5 +1,10 @@
 .idea/
 venv*
+
+# OS / accidental dumps
+**/.DS_Store
+db_cluster*.gz
+*backup*.gz
 client/node_modules/
 pycaches/
 client/build/
@@ -27,7 +32,6 @@ client/*.local
 client/.vscode/*
 client/!.vscode/extensions.json
 client/.idea
-client/.DS_Store
 client/*.suo
 client/*.ntvs*
 client/*.njsproj
