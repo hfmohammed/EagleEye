@@ -2,21 +2,26 @@
 
 import { useContext, useState, useEffect, useRef } from "react"
 import { SettingsContext } from "../context/SettingsContext"
-import { X, SettingsIcon, Camera, Wifi, Plus, Trash2, Save, AlertCircle, Monitor, Radio, Sliders } from "lucide-react"
+import {
+  X,
+  Settings as SettingsIcon,
+  Camera,
+  Wifi,
+  Plus,
+  Trash2,
+  Save,
+  AlertCircle,
+  Monitor,
+  Radio,
+  SlidersHorizontal,
+  Loader2,
+} from "lucide-react"
 
 const Settings = () => {
   const {
-    isCameraEnabled,
-    setIsCameraEnabled,
-    toggleCamera,
-    inflight,
-    switchSource,
     fps,
-    setFps,
     rtspLinks,
-    setRtspLinks,
     inputSource,
-    setInputSource,
     saveSettings,
     settingsOpen,
     setSettingsOpen,
@@ -29,9 +34,7 @@ const Settings = () => {
   const [isSaving, setIsSaving] = useState(false)
   const bottomRef = useRef(null)
 
-  // Update local state when context values change
   useEffect(() => {
-    console.log(rtspLinks)
     setSelectedSource(inputSource)
     setEditedFps(fps)
     setEditedRtspLinks(rtspLinks)
@@ -39,43 +42,26 @@ const Settings = () => {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-    console.log(editedRtspLinks)
   }, [editedRtspLinks])
 
   const handleSourceChange = (event) => {
-    const newSource = event.target.value
-    console.log("Source changed to:", newSource)
-    setSelectedSource(newSource)
+    setSelectedSource(event.target.value)
   }
 
   const _saveSettings = async () => {
     setIsSaving(true)
-
-    if (selectedSource === "webcam") {
-      // Clear RTSP link if webcam is selected
-    }
-
-    console.log("Saving settings:", { editedFps, editedRtspLinks, selectedSource })
     const newErrors = await saveSettings(editedFps, editedRtspLinks, selectedSource)
-    console.log("NEW ERRORS", newErrors)
-
     if (newErrors.length > 0) {
       setErrors(newErrors)
-      console.log(newErrors)
     } else {
       setErrors([])
-      console.log("success")
       setSettingsOpen(false)
     }
-
     setIsSaving(false)
   }
 
   const addRtspLink = () => {
-    console.log(editedRtspLinks)
-    console.log("clicked add item")
     setEditedRtspLinks([...editedRtspLinks, ""])
-    console.log(editedRtspLinks)
   }
 
   const removeRtspLink = (index) => {
@@ -92,115 +78,95 @@ const Settings = () => {
 
   return (
     <>
-      {/* Backdrop */}
+      <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-[2px]" onClick={() => setSettingsOpen(false)} aria-hidden />
+
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+        className="fixed inset-0 z-[61] flex items-center justify-center p-4"
         onClick={() => setSettingsOpen(false)}
-      />
-
-      {/* Settings Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-slate-800/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700 w-full max-w-2xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-300">
-          {/* Header */}
-          <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-slate-900/80 to-slate-800/80">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <SettingsIcon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-white">Settings</h1>
-                  <p className="text-sm text-slate-400">Configure your CCTV system</p>
-                </div>
+        role="presentation"
+      >
+        <div
+          className="ee-surface-deep flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-sm border border-ee-border shadow-2xl ring-1 ring-ee-border/50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="settings-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between gap-3 border-b border-ee-border px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-sm border border-ee-border bg-ee-base text-ee-accent">
+                <SettingsIcon className="size-5" strokeWidth={1.75} />
               </div>
-
-              <button
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
-                onClick={() => setSettingsOpen(false)}
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div>
+                <h2 id="settings-title" className="font-display text-base font-bold uppercase tracking-[0.16em] text-ee-text">
+                  Configuration
+                </h2>
+                <p className="font-mono text-[11px] text-ee-muted">Ingress, sensors, decode load</p>
+              </div>
             </div>
+            <button
+              type="button"
+              className="cursor-pointer rounded-sm p-2 text-ee-muted transition-colors hover:bg-ee-inset hover:text-ee-text"
+              onClick={() => setSettingsOpen(false)}
+              aria-label="Close"
+            >
+              <X className="size-5" />
+            </button>
           </div>
 
-          {/* Error Messages */}
           {errors.length > 0 && (
-            <div className="p-4 bg-red-500/10 border-b border-red-500/20">
+            <div className="border-b border-ee-critical/40 bg-ee-critical/10 px-5 py-3">
               {errors.map((error, index) => (
-                <div key={index} className="flex items-center space-x-2 text-red-400 text-sm">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <div key={index} className="flex gap-2 font-mono text-sm text-ee-critical">
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" />
                   <span>{error}</span>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <div className="flex-1 overflow-y-auto px-5 py-5">
             <div className="space-y-8">
-              {/* FPS Settings */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                    <Sliders className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Frame Rate</h3>
-                    <p className="text-sm text-slate-400">Adjust video capture frame rate</p>
-                  </div>
+              <section className="space-y-3">
+                <div className="flex items-center gap-2 text-ee-text">
+                  <SlidersHorizontal className="size-4 text-ee-muted" strokeWidth={1.75} />
+                  <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em]">Frame rate</h3>
                 </div>
-
-                <div className="bg-slate-700/30 rounded-xl p-4 border border-slate-600">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <input
-                        type="range"
-                        min={1}
-                        max={40}
-                        step={1}
-                        value={editedFps}
-                        onChange={(e) => setEditedFps(Number(e.target.value))}
-                        className="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                      <div className="flex justify-between text-xs text-slate-400 mt-1">
-                        <span>1 FPS</span>
-                        <span>40 FPS</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
+                <div className="rounded-sm border border-ee-border bg-ee-base/50 p-4">
+                  <input
+                    type="range"
+                    min={1}
+                    max={40}
+                    step={1}
+                    value={editedFps}
+                    onChange={(e) => setEditedFps(Number(e.target.value))}
+                    className="ee-range w-full"
+                  />
+                  <div className="mt-2 flex items-center justify-between font-mono text-xs text-ee-muted">
+                    <span>1</span>
+                    <div className="flex items-center gap-2">
                       <input
                         type="number"
                         min={1}
                         max={40}
-                        step={1}
                         value={editedFps}
                         onChange={(e) => setEditedFps(Number(e.target.value))}
-                        className="w-16 px-2 py-1 bg-slate-600 border border-slate-500 rounded-lg text-white text-center focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                        className="w-14 rounded-sm border border-ee-border bg-ee-elevate py-1 text-center font-mono text-sm text-ee-text focus:border-ee-accent focus:outline-none focus:ring-2 focus:ring-ee-accent/25"
                       />
-                      <span className="text-sm text-slate-300 font-medium">FPS</span>
+                      <span className="text-ee-muted">fps</span>
                     </div>
+                    <span>40</span>
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Input Source */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                    <Camera className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Input Source</h3>
-                    <p className="text-sm text-slate-400">Choose your video input method</p>
-                  </div>
+              <section className="space-y-3">
+                <div className="flex items-center gap-2 text-ee-text">
+                  <Camera className="size-4 text-ee-muted" strokeWidth={1.75} />
+                  <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em]">Input source</h3>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Webcam Option */}
-                  <label
-                    className={`relative cursor-pointer ${selectedSource === "webcam" ? "ring-2 ring-green-500" : ""}`}
-                  >
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="block cursor-pointer">
                     <input
                       type="radio"
                       name="input-source"
@@ -210,26 +176,23 @@ const Settings = () => {
                       className="sr-only"
                     />
                     <div
-                      className={`p-4 rounded-xl border transition-all ${
+                      className={`rounded-sm border p-4 transition-colors ${
                         selectedSource === "webcam"
-                          ? "bg-green-500/20 border-green-500 text-green-400"
-                          : "bg-slate-700/30 border-slate-600 text-slate-300 hover:border-slate-500"
+                          ? "border-ee-accent bg-ee-elevate/80 ring-1 ring-ee-accent/30"
+                          : "border-ee-border bg-ee-base/40 hover:border-ee-border"
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <Monitor className="w-5 h-5" />
+                      <div className="flex items-center gap-3 text-sm">
+                        <Monitor className="size-5 text-ee-accent" strokeWidth={1.75} />
                         <div>
-                          <div className="font-medium">Webcam</div>
-                          <div className="text-xs opacity-75">Use local camera</div>
+                          <p className="font-display text-xs font-bold uppercase tracking-wide text-ee-text">Webcam</p>
+                          <p className="font-mono text-[10px] text-ee-muted">Local sensor</p>
                         </div>
                       </div>
                     </div>
                   </label>
 
-                  {/* RTSP Option */}
-                  <label
-                    className={`relative cursor-pointer ${selectedSource === "rtsp" ? "ring-2 ring-blue-500" : ""}`}
-                  >
+                  <label className="block cursor-pointer">
                     <input
                       type="radio"
                       name="input-source"
@@ -239,155 +202,100 @@ const Settings = () => {
                       className="sr-only"
                     />
                     <div
-                      className={`p-4 rounded-xl border transition-all ${
+                      className={`rounded-sm border p-4 transition-colors ${
                         selectedSource === "rtsp"
-                          ? "bg-blue-500/20 border-blue-500 text-blue-400"
-                          : "bg-slate-700/30 border-slate-600 text-slate-300 hover:border-slate-500"
+                          ? "border-ee-accent bg-ee-elevate/80 ring-1 ring-ee-accent/30"
+                          : "border-ee-border bg-ee-base/40 hover:border-ee-border"
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <Radio className="w-5 h-5" />
+                      <div className="flex items-center gap-3 text-sm">
+                        <Radio className="size-5 text-ee-accent" strokeWidth={1.75} />
                         <div>
-                          <div className="font-medium">RTSP Stream</div>
-                          <div className="text-xs opacity-75">Network cameras</div>
+                          <p className="font-display text-xs font-bold uppercase tracking-wide text-ee-text">RTSP</p>
+                          <p className="font-mono text-[10px] text-ee-muted">Network ingress</p>
                         </div>
                       </div>
                     </div>
                   </label>
                 </div>
-              </div>
+              </section>
 
-              {/* RTSP Links */}
               {selectedSource === "rtsp" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
-                        <Wifi className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">RTSP Streams</h3>
-                        <p className="text-sm text-slate-400">Configure your camera streams</p>
-                      </div>
+                <section className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-ee-text">
+                      <Wifi className="size-4 text-ee-muted" strokeWidth={1.75} />
+                      <h3 className="font-display text-xs font-bold uppercase tracking-[0.14em]">Streams</h3>
                     </div>
-
                     <button
+                      type="button"
                       onClick={addRtspLink}
-                      className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm border border-ee-border bg-ee-inset px-2.5 py-1.5 font-mono text-xs font-medium text-ee-text hover:bg-ee-inset/90"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Stream</span>
+                      <Plus className="size-3.5" />
+                      Add URL
                     </button>
                   </div>
 
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
                     {editedRtspLinks.map((link, index) => (
-                      <div key={index} className="bg-slate-700/30 rounded-xl p-4 border border-slate-600">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex-1">
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
-                              Camera {index + 1} RTSP URL
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="rtsp://username:password@ip:port/stream"
-                              value={link}
-                              onChange={(e) => updateRtspLink(index, e.target.value)}
-                              className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
+                      <div key={index} className="flex gap-2 rounded-sm border border-ee-border bg-ee-base/50 p-3">
+                        <div className="min-w-0 flex-1">
+                          <label className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-wider text-ee-muted">
+                            Camera {index + 1}
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="rtsp://username:password@host:554/stream"
+                            value={link}
+                            onChange={(e) => updateRtspLink(index, e.target.value)}
+                            className="w-full rounded-sm border border-ee-border bg-ee-elevate px-2.5 py-2 font-mono text-sm text-ee-text placeholder:text-ee-muted focus:border-ee-accent focus:outline-none focus:ring-2 focus:ring-ee-accent/25"
                             />
-                          </div>
-
-                          <button
-                            onClick={() => removeRtspLink(index)}
-                            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removeRtspLink(index)}
+                          className="mt-5 shrink-0 cursor-pointer self-start rounded-sm border border-transparent p-2 text-ee-muted hover:border-ee-critical/30 hover:bg-ee-critical/10 hover:text-ee-critical"
+                          aria-label="Remove stream"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
                       </div>
                     ))}
-                    <div ref={bottomRef}></div>
+                    <div ref={bottomRef} />
                   </div>
 
                   {editedRtspLinks.length === 0 && (
-                    <div className="text-center py-8 text-slate-400">
-                      <Camera className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No RTSP streams configured</p>
-                      <p className="text-sm">Click "Add Stream" to get started</p>
+                    <div className="rounded-sm border border-dashed border-ee-border py-8 text-center font-mono text-sm text-ee-muted">
+                      <Camera className="mx-auto mb-2 size-10 opacity-40" strokeWidth={1.25} />
+                      <p>No RTSP URLs yet.</p>
                     </div>
                   )}
-                </div>
+                </section>
               )}
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="p-6 border-t border-slate-700 bg-gradient-to-r from-slate-900/50 to-slate-800/50">
-            <div className="flex items-center justify-end space-x-3">
-              <button
-                onClick={() => setSettingsOpen(false)}
-                className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={_saveSettings}
-                disabled={isSaving}
-                className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                {isSaving ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Saving...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Save Settings</span>
-                  </>
-                )}
-              </button>
-            </div>
+          <div className="flex justify-end gap-2 border-t border-ee-border bg-ee-base/50 px-5 py-4">
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(false)}
+              className="cursor-pointer rounded-sm px-4 py-2 font-mono text-sm font-medium text-ee-muted hover:bg-ee-inset hover:text-ee-text"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={_saveSettings}
+              disabled={isSaving}
+              className="font-display inline-flex cursor-pointer items-center gap-2 rounded-sm bg-ee-accent px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-ee-cta-ink shadow-[0_0_20px_rgba(57,255,106,0.22)] hover:brightness-110 disabled:opacity-50"
+            >
+              {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              Save
+            </button>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6, #06b6d4);
-          cursor: pointer;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .slider::-moz-range-thumb {
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #3b82f6, #06b6d4);
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes zoom-in {
-          from { transform: scale(0.95); }
-          to { transform: scale(1); }
-        }
-
-        .animate-in {
-          animation: fade-in 0.3s ease-out, zoom-in 0.3s ease-out;
-        }
-      `}</style>
     </>
   )
 }
