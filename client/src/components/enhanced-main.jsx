@@ -8,59 +8,15 @@ import { SettingsContext } from "../context/SettingsContext"
 import EnhancedBarChart from "./enhanced-bar-chart"
 import EnhancedPieChart from "./enhanced-pie-chart"
 import EnhancedLineChart from "./enhanced-line-chart"
+import { Video, TrendingUp, TriangleAlert, UserRound, Zap, BarChart3, Crosshair } from "lucide-react"
 
 function Main() {
   const { cameraData, updateData } = useContext(DataContext)
   const { selectedTab, setSelectedTab, enableAnnotationsRef } = useContext(SettingsContext)
   const [cameraIds, setCameraIds] = useState([])
-
-  const CameraIcon = () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2 2v8a2 2 0 002 2z"
-      />
-    </svg>
-  )
-
-  const TrendIcon = () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-    </svg>
-  )
-
-  const AlertIcon = () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-      />
-    </svg>
-  )
-
-  const PersonIcon = () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-      />
-    </svg>
-  )
-
-  const SpeedIcon = () => (
-    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-    </svg>
-  )
+  const [annotationsOn, setAnnotationsOn] = useState(() => Boolean(enableAnnotationsRef.current))
 
   useEffect(() => {
-    console.log("Camera data keys:", Object.keys(cameraData))
     setCameraIds(Object.keys(cameraData))
   }, [cameraData])
 
@@ -72,25 +28,23 @@ function Main() {
     category_counts: {},
   }
 
-  // Enhanced pie chart data
   const pieChartData = {
     labels: Object.keys(activeData.category_counts || {}),
     datasets: [
       {
         data: Object.values(activeData.category_counts || {}),
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"],
+        backgroundColor: ["#39FF6A", "#2a8f4a", "#6B7368", "#3d4a42", "#252b28", "#161A18"],
       },
     ],
   }
 
-  // Enhanced line chart data
   const fpsLineChartData = {
     labels: activeData.fpsData.map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [
       {
-        label: "FPS Over Time",
+        label: "FPS",
         data: activeData.fpsData.map((entry) => entry.fps),
-        borderColor: "#36A2EB",
+        borderColor: "#39FF6A",
         fill: false,
       },
     ],
@@ -100,9 +54,9 @@ function Main() {
     labels: activeData.latencyData.map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [
       {
-        label: "Latency Over Time",
+        label: "Latency",
         data: activeData.latencyData.map((entry) => entry.latency),
-        borderColor: "#FF6384",
+        borderColor: "#F5A623",
         fill: false,
       },
     ],
@@ -112,9 +66,9 @@ function Main() {
     labels: activeData.tableData.map((entry) => new Date(entry.timestamp).toLocaleTimeString()),
     datasets: [
       {
-        label: "Detections Over Time",
+        label: "Detections",
         data: activeData.tableData.map((entry) => entry.count),
-        borderColor: "#FFCE56",
+        borderColor: "#C8D0C8",
         fill: false,
       },
     ],
@@ -124,145 +78,127 @@ function Main() {
     labels: activeData.personCountData.map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [
       {
-        label: "Person Count Over Time",
+        label: "People",
         data: activeData.personCountData.map((entry) => entry.count),
-        borderColor: "#4BC0C0",
+        borderColor: "#67E8F9",
         fill: false,
       },
     ],
   }
 
-  // Enhanced bar chart data
   const personCountBarChartData = {
     labels: activeData.personCountData.slice(-6).map((entry) => new Date(entry.time).toLocaleTimeString()),
     datasets: [
       {
-        label: "Person Count",
+        label: "Person count",
         data: activeData.personCountData.slice(-6).map((entry) => entry.count),
       },
     ],
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 md:p-6 transition-all flex flex-col gap-6">
-      {/* Enhanced Header Controls */}
-      <div className="flex justify-between items-center">
-        <div className="flex camera-data-controls space-x-2">
+    <main className="ee-surface flex flex-1 flex-col gap-5 border-t border-ee-border/60 p-3 text-ee-text md:gap-6 md:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-1.5">
           {cameraIds.map((id) => (
             <button
               key={id}
+              type="button"
               onClick={() => setSelectedTab(id)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`font-display inline-flex items-center gap-2 rounded-sm border px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${
                 selectedTab === id
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
-                  : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600"
+                  ? "border-ee-accent bg-ee-inset text-ee-accent shadow-[0_0_14px_rgba(57,255,106,0.12)]"
+                  : "border-ee-border bg-ee-base text-ee-muted hover:border-ee-muted hover:text-ee-text"
               }`}
             >
+              <Video className="size-3.5 opacity-80" aria-hidden />
               {id}
             </button>
           ))}
         </div>
 
-        <div>
-          <button
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              enableAnnotationsRef.current
-                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600"
-            }`}
-            onClick={() => {
-              enableAnnotationsRef.current = !enableAnnotationsRef.current
-              localStorage.setItem("enableAnnotationsRef", JSON.stringify(enableAnnotationsRef.current))
-            }}
-          >
-            {enableAnnotationsRef.current ? "🎯 Annotate ON" : "🎯 Annotate OFF"}
-          </button>
-        </div>
+        <button
+          type="button"
+          className={`font-display inline-flex items-center justify-center gap-2 rounded-sm border px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
+            annotationsOn
+              ? "border-ee-accent bg-ee-inset text-ee-accent shadow-[0_0_14px_rgba(57,255,106,0.12)]"
+              : "border-ee-border bg-ee-base text-ee-muted hover:border-ee-muted hover:text-ee-text"
+          }`}
+          onClick={() => {
+            const next = !enableAnnotationsRef.current
+            enableAnnotationsRef.current = next
+            setAnnotationsOn(next)
+            localStorage.setItem("enableAnnotationsRef", JSON.stringify(next))
+          }}
+        >
+          <Crosshair className={`size-3.5 ${annotationsOn ? "" : "opacity-40"}`} aria-hidden />
+          {annotationsOn ? "Overlays ON" : "Overlays OFF"}
+        </button>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Camera Feed */}
-        <div className="w-full lg:w-1/2 flex">
-          <div className="flex items-center justify-center w-full bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700 p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:gap-6">
+        <div className="flex w-full lg:w-1/2">
+          <div className="ee-surface-deep flex w-full items-center justify-center rounded-sm border border-ee-border p-3 md:p-4">
             <Camera
               onDataUpdate={(data) => {
                 const camId = data.camera_id ?? `camera ${data.index}`
-                console.log("Updating data for camera:", camId, data)
                 updateData(camId, data)
               }}
             />
           </div>
         </div>
 
-        {/* Right Side Charts */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-6">
-          <div className="flex-1">
-            <EnhancedPieChart
-              data={pieChartData}
-              title="Detection Categories"
-              subtitle="Object detection distribution"
-              icon={
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              }
-            />
-          </div>
-          <div className="flex-1">
-            <EnhancedLineChart
-              data={fpsLineChartData}
-              title="FPS Performance"
-              subtitle="Frame rate monitoring"
-              icon={<SpeedIcon />}
-            />
-          </div>
+        <div className="flex w-full flex-col gap-5 lg:w-1/2">
+          <EnhancedPieChart
+            data={pieChartData}
+            title="Object classes"
+            subtitle="Distribution (current stream)"
+            icon={<BarChart3 className="size-4" strokeWidth={2} aria-hidden />}
+          />
+          <EnhancedLineChart
+            data={fpsLineChartData}
+            title="Frame rate"
+            subtitle="Throughput (FPS)"
+            icon={<Zap className="size-4" strokeWidth={2} aria-hidden />}
+          />
         </div>
       </div>
 
-      {/* Bottom Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-4">
         <EnhancedLineChart
           data={latencyLineChartData}
-          title="Network Latency"
-          subtitle="Response time monitoring"
-          icon={<AlertIcon />}
+          title="Latency"
+          subtitle="Round-trip (ms)"
+          icon={<TriangleAlert className="size-4" strokeWidth={2} aria-hidden />}
           height={250}
         />
 
         <EnhancedLineChart
           data={detectionsLineChartData}
-          title="Detection Events"
-          subtitle="Object detection frequency"
-          icon={<CameraIcon />}
+          title="Detections"
+          subtitle="Events / interval"
+          icon={<Video className="size-4" strokeWidth={2} aria-hidden />}
           height={250}
         />
 
         <EnhancedLineChart
           data={personCountLineChartData}
-          title="Person Tracking"
-          subtitle="People count over time"
-          icon={<PersonIcon />}
+          title="Personnel"
+          subtitle="In-frame count"
+          icon={<UserRound className="size-4" strokeWidth={2} aria-hidden />}
           height={250}
         />
 
-        {/* Enhanced Bar Chart */}
         <EnhancedBarChart
           data={personCountBarChartData}
-          title="Recent Activity"
-          subtitle="Last 6 measurements"
-          icon={<CameraIcon />}
+          title="Recent samples"
+          subtitle="Last 6 intervals"
+          icon={<TrendingUp className="size-4" strokeWidth={2} aria-hidden />}
           height={250}
         />
       </div>
 
-      {/* Detection Table */}
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700">
+      <div className="ee-surface-deep rounded-sm border border-ee-border">
         <DetectionTable rows={activeData.tableData} />
       </div>
     </main>
